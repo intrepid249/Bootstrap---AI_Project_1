@@ -1,6 +1,8 @@
 #include "Game_AI_AaronApp.h"
 #include <GLFW\glfw3.h>
 
+#include <GlobalConfig.h>
+
 #include <signal.h>
 #include <Windows.h>
 #include <iostream>
@@ -55,19 +57,24 @@ int main() {
 
 	/// Configuration
 	// Load settings in from config file
+
+	GlobalConfig::create("config/settings.ini");
+
 	system("mkdir config");
-	ini_t ini("config/settings.ini", true);
-	ini.save();
+	ini_t *ini = GlobalConfig::getInstance();
+	ini->save();
 
-	ini.select("DisplayOptions");
+	ini->select("DisplayOptions");
 
-	std::string title = ini.get("WindowTitle");
-	int ScreenWidth = ini.get("WindowWidth", 1);
-	int ScreenHeight = ini.get("WindowHeight", 1);
-	bool fullscreen = ini.get("Fullscreen", 1);
+	std::string title = ini->get("WindowTitle");
+	int ScreenWidth = ini->get("WindowWidth", 1);
+	int ScreenHeight = ini->get("WindowHeight", 1);
+	bool fullscreen = ini->get("Fullscreen", 1);
 
 	app = new Game_AI_AaronApp();
 	app->run(title.c_str(), ScreenWidth, ScreenHeight, fullscreen);
+
+	GlobalConfig::destroy();
 	delete app;
 
 	return 0;

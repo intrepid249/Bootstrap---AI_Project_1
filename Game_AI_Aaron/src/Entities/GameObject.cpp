@@ -1,6 +1,8 @@
 #include <Entities\GameObject.h>
 #include <Renderer2D.h>
 
+#include <GlobalConfig.h>
+
 GameObject::GameObject() : m_friction(0.0f) {
 }
 
@@ -57,9 +59,9 @@ const float & GameObject::getFriction() {
 
 #pragma region Screen Functions
 void GameObject::wrapScreenBounds() {
-	ini_t cfg("config/settings.ini", true);
-	int winWidth = cfg.get("DisplayOptions", "WindowWidth", 1);
-	int winHeight = cfg.get("DisplayOptions", "WindowHeight", 1);
+	ini_t *cfg = GlobalConfig::getInstance();
+	int winWidth = cfg->get("DisplayOptions", "WindowWidth", 1);
+	int winHeight = cfg->get("DisplayOptions", "WindowHeight", 1);
 
 	if (m_pos.x < 0) setPos(glm::vec2(winWidth, m_pos.y));
 	if (m_pos.x > winWidth) setPos(glm::vec2(0, m_pos.y));
@@ -68,9 +70,9 @@ void GameObject::wrapScreenBounds() {
 }
 
 void GameObject::constrainToScreenBounds() {
-	ini_t cfg("config/settings.ini", true);
-	int winWidth = cfg.get("DisplayOptions", "WindowWidth", 1);
-	int winHeight = cfg.get("DisplayOptions", "WindowHeight", 1);
+	ini_t *cfg = GlobalConfig::getInstance();
+	int winWidth = cfg->get("DisplayOptions", "WindowWidth", 1);
+	int winHeight = cfg->get("DisplayOptions", "WindowHeight", 1);
 
 	
 }
