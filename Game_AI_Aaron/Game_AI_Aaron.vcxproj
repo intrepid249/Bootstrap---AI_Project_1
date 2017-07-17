@@ -89,12 +89,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\CBehaviourController.cpp" />
+    <ClCompile Include="src\Components\CKeyboardController.cpp" />
     <ClCompile Include="src\Entities\GameObject.cpp" />
     <ClCompile Include="src\Game_AI_AaronApp.cpp" />
     <ClCompile Include="src\GlobalConfig.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\Behaviours\Behaviour.h" />
+    <ClInclude Include="inc\Components\CBehaviourController.h" />
+    <ClInclude Include="inc\Components\CKeyboardController.h" />
+    <ClInclude Include="inc\Components\JM_Component.h" />
     <ClInclude Include="inc\Entities\GameObject.h" />
     <ClInclude Include="inc\Game_AI_AaronApp.h" />
     <ClInclude Include="inc\GlobalConfig.h" />
