@@ -46,15 +46,15 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(ProjectDir)inc;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Graph\inc\;$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(ProjectDir)inc;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)dependencies\timer\src;$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(ProjectDir)inc;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <IncludePath>$(SolutionDir)Graph\inc\;$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(ProjectDir)inc;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)dependencies\timer\src;$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,6 +94,8 @@
     <ClCompile Include="src\Entities\GameObject.cpp" />
     <ClCompile Include="src\Game_AI_AaronApp.cpp" />
     <ClCompile Include="src\GlobalConfig.cpp" />
+    <ClCompile Include="src\Graph\Graph2D.cpp" />
+    <ClCompile Include="src\Graph\Graph2DRenderer.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -104,7 +106,14 @@
     <ClInclude Include="inc\Entities\GameObject.h" />
     <ClInclude Include="inc\Game_AI_AaronApp.h" />
     <ClInclude Include="inc\GlobalConfig.h" />
+    <ClInclude Include="inc\Graph\Graph2D.h" />
+    <ClInclude Include="inc\Graph\Graph2DRenderer.h" />
     <ClInclude Include="inc\Utilities\jm_utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Graph\Graph.vcxproj">
+      <Project>{145705a4-0b4f-44c3-b546-d17d27c127fc}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

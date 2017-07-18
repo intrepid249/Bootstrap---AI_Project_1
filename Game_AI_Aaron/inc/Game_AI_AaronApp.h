@@ -1,6 +1,8 @@
 #pragma once
 #include "Application.h"
 #include <memory>
+#include <Graph\Graph2D.h>
+#include <Graph\Graph2DRenderer.h>
 
 namespace aie {
 	class Renderer2D;
@@ -25,4 +27,7 @@ protected:
 	aie::Font*			m_font;
 
 	std::unique_ptr<GameObject> m_player = nullptr;
+
+	std::unique_ptr<Graph2D> m_graph;
+	std::unique_ptr<Graph2DRenderer> m_graphRenderer;
 };
