@@ -1,30 +1,60 @@
-#include <Entities\GameObject.h>
+#include "Entities\GameObject.h"
+
+#include "GlobalConfig.h"
+#include "Components\JM_Component.h"
+#include "Behaviours\Behaviour.h"
+
+#include "Behaviours\BKeyboardControlled.h"
+
 #include <Renderer2D.h>
+#include <glm\glm.hpp>
 
-#include <GlobalConfig.h>
-
-GameObject::GameObject() : m_friction(0.0f) {
+GameObject::GameObject() : m_friction(0.0f), m_drawn(true) {
 }
 
 GameObject::~GameObject() {
 }
 
 void GameObject::update(float deltaTime) {
-	applyForce(m_friction * -m_velocity);
+	if (isDrawn()) {
+		applyForce(m_friction * -m_velocity);
 
-	m_velocity += m_acceleration * deltaTime;
-	m_pos += m_velocity * deltaTime;
-	m_acceleration = glm::vec2();
+		m_velocity += m_acceleration * deltaTime;
+		m_pos += m_velocity * deltaTime;
+		m_acceleration = glm::vec2();
+
+		for (size_t i = 0; i < m_components.size(); ++i)
+			m_components[i]->update(deltaTime);
+
+		if (m_behaviour != nullptr)
+			m_behaviour->doActions(deltaTime);
+	}
 }
 
 void GameObject::render(aie::Renderer2D * renderer) {
-	renderer->drawCircle(m_pos.x, m_pos.y, 8);
+	if (isDrawn()) {
+#ifdef _DEBUG
+		renderer->drawCircle(m_pos.x, m_pos.y, 3);
 
-	// Draw the heading/velocity
-	renderer->setRenderColour(0xFF7F00FF);
-	glm::vec2 targetHeading = m_pos + m_velocity;
-	renderer->drawLine(m_pos.x, m_pos.y, targetHeading.x, targetHeading.y, 2.f);
-	renderer->setRenderColour(0xFFFFFFFF);
+		// Draw the heading/velocity
+		renderer->setRenderColour(0xFF7F00FF);
+		glm::vec2 targetHeading = m_pos + m_velocity;
+		renderer->drawLine(m_pos.x, m_pos.y, targetHeading.x, targetHeading.y, 2.f);
+		renderer->setRenderColour(0xFFFFFFFF);
+
+		for (size_t i = 0; i < m_components.size(); ++i)
+			m_components[i]->render(renderer);
+
+		if (m_behaviour != nullptr)
+			m_behaviour->debugRender(renderer);
+
+		// Draw the lookat rotation - used to rotate sprites properly according to movement
+		renderer->setRenderColour(0xFF007FFF);
+		float rot = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
+		renderer->drawCircle(m_pos.x + cosf(rot) * 20, m_pos.y + sinf(rot) * 20, 2);
+		renderer->setRenderColour(0xFFFFFFFF);
+#endif // _DEBUG
+	}
 }
 
 void GameObject::applyForce(const glm::vec2 & _force) {
@@ -54,6 +84,21 @@ void GameObject::setFriction(const float & _friction) {
 
 const float & GameObject::getFriction() {
 	return m_friction;
+}
+void GameObject::addComponent(std::shared_ptr<JM_Component> _component) {
+	m_components.push_back(std::move(_component));
+}
+void GameObject::setDraw(bool val) {
+	m_drawn = val;
+}
+bool GameObject::isDrawn() {
+	return m_drawn;
+}
+void GameObject::setBehaviour(std::shared_ptr<Behaviour> behaviour) {
+	m_behaviour = behaviour;
+}
+Behaviour * GameObject::getBehaviour() {
+	return m_behaviour.get();
 }
 #pragma endregion
 

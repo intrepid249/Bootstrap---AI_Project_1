@@ -23,8 +23,7 @@ public:
 	virtual void draw();
 
 protected:
-	aie::Renderer2D*	m_renderer;
-	aie::Font*			m_font;
+	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
 	std::unique_ptr<GameObject> m_player = nullptr;
 

@@ -3,7 +3,12 @@
 typedef INI<> ini_t;
 
 #include <glm\vec2.hpp>
+#include <vector>
+#include <memory>
 
+class Behaviour;
+
+class JM_Component;
 namespace aie {
 	class Renderer2D;
 };
@@ -18,6 +23,7 @@ public:
 
 	void applyForce(const glm::vec2& _force);
 
+#pragma region Getters and Setters
 	void setPos(const glm::vec2& _pos);
 	const glm::vec2 &getPos();
 
@@ -27,6 +33,20 @@ public:
 	void setFriction(const float& friction);
 	const float &getFriction();
 
+	/** Append components into the object*/
+	void addComponent(std::shared_ptr<JM_Component> _component);
+	/** Attain external access to a component of a defined type*/
+	template<typename T>
+	T * getComponentOfType();
+
+	void setDraw(bool val);
+	bool isDrawn();
+
+	void setBehaviour(std::shared_ptr<Behaviour> behaviour);
+	Behaviour *getBehaviour();
+
+#pragma endregion
+
 	void wrapScreenBounds();
 	void constrainToScreenBounds();
 	void destroyOnExitScreen();
@@ -34,6 +54,20 @@ public:
 protected:
 	glm::vec2 m_pos, m_velocity, m_acceleration;
 	float m_friction;
+	bool m_drawn;
+
+	std::vector<std::shared_ptr<JM_Component>> m_components;
+	std::shared_ptr<Behaviour> m_behaviour;
 
 private:
 };
+
+template<typename T>
+inline T * GameObject::getComponentOfType() {
+	for (auto iter = m_components.begin(); iter != m_components.end(); iter++) {
+		if (dynamic_cast<T*>(*iter) != nullptr) {
+			return dynamic_cast<T*>(*iter);
+		}
+	}
+	return nullptr;
+}

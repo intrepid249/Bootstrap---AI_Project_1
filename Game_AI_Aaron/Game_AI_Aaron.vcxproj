@@ -46,14 +46,14 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Graph\inc\;$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(ProjectDir)inc;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)dependencies\timer\src;$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(SolutionDir)Graph\inc\;$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(ProjectDir)inc;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)dependencies\timer\src;$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -63,6 +63,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -79,6 +80,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -89,25 +91,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Behaviours\BFollowPath.cpp" />
+    <ClCompile Include="src\Behaviours\BKeyboardControlled.cpp" />
+    <ClCompile Include="src\Behaviours\BSeek.cpp" />
     <ClCompile Include="src\Components\CBehaviourController.cpp" />
     <ClCompile Include="src\Components\CKeyboardController.cpp" />
     <ClCompile Include="src\Entities\GameObject.cpp" />
+    <ClCompile Include="src\Entities\player.cpp" />
     <ClCompile Include="src\Game_AI_AaronApp.cpp" />
     <ClCompile Include="src\GlobalConfig.cpp" />
     <ClCompile Include="src\Graph\Graph2D.cpp" />
     <ClCompile Include="src\Graph\Graph2DRenderer.cpp" />
+    <ClCompile Include="src\Graph\Path.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Behaviours\Behaviour.h" />
+    <ClInclude Include="inc\Behaviours\BFollowPath.h" />
+    <ClInclude Include="inc\Behaviours\BKeyboardControlled.h" />
+    <ClInclude Include="inc\Behaviours\BSeek.h" />
     <ClInclude Include="inc\Components\CBehaviourController.h" />
     <ClInclude Include="inc\Components\CKeyboardController.h" />
     <ClInclude Include="inc\Components\JM_Component.h" />
     <ClInclude Include="inc\Entities\GameObject.h" />
+    <ClInclude Include="inc\Entities\Player.h" />
     <ClInclude Include="inc\Game_AI_AaronApp.h" />
     <ClInclude Include="inc\GlobalConfig.h" />
     <ClInclude Include="inc\Graph\Graph2D.h" />
     <ClInclude Include="inc\Graph\Graph2DRenderer.h" />
+    <ClInclude Include="inc\Graph\Path.h" />
+    <ClInclude Include="inc\Utilities\Colour.h" />
     <ClInclude Include="inc\Utilities\jm_utilities.h" />
   </ItemGroup>
   <ItemGroup>
