@@ -8,5 +8,5 @@ public:
 	Graph2D() = default;
 	virtual ~Graph2D() = default;
 
-	void getNearbyNodes(glm::vec2 pos, float radius, std::vector<Node*> &nearbyNodes);
+	void getNearbyNodes(const glm::vec2& pos, float radius, std::vector<Node*> &nearbyNodes);
 };

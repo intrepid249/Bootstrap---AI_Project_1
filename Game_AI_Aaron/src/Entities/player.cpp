@@ -5,9 +5,13 @@
 #include "Graph\Path.h"
 #include "Behaviours\BFollowPath.h"
 
+#include "GlobalConfig.h"
+
 #include <Font.h>
 #include <Input.h>
 #include <Renderer2D.h>
+
+#include <imgui.h>
 
 Player::Player() : GameObject() {
 	m_font = std::unique_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 18));
@@ -41,7 +45,10 @@ Player::Player() : GameObject() {
 	m_followPathBehaviour->setStrength(80);
 	m_followPathBehaviour->setNodeRadius(20);
 	m_followPathBehaviour->onLastNodeReached([this]() {
-		m_followPathBehaviour->setPatrolDir(m_followPathBehaviour->getPatrolDir() * -1);
+		if (m_followPathBehaviour->isPatrolling())
+			m_followPathBehaviour->setPatrolDir(m_followPathBehaviour->getPatrolDir() * -1);
+		else
+			setBehaviour(m_keyboardBehaviour);
 	});
 
 	setBehaviour(m_keyboardBehaviour);
@@ -52,6 +59,20 @@ Player::~Player() {
 }
 
 void Player::update(float deltaTime) {
+
+	// Add a live debugging window
+#ifdef _DEBUG
+	ImGui::Begin("Debugging");
+
+	if (ImGui::CollapsingHeader("AI")) {
+		static bool flag = false;
+		if (ImGui::Checkbox("Patrolling", &flag));
+		m_followPathBehaviour->isPatrolling(flag);
+	}
+	
+	ImGui::End();
+#endif // _DEBUG
+
 	GameObject::update(deltaTime);
 
 	aie::Input *input = aie::Input::getInstance();
@@ -60,24 +81,24 @@ void Player::update(float deltaTime) {
 	input->getMouseXY(&mx, &my);
 	glm::vec2 mousePos(mx, my);
 
-	if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
-		m_seekBehaviour->setTarget(mousePos);
-		setBehaviour(m_seekBehaviour);
-	} 
-	else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
-		m_fleeBehaviour->setTarget(mousePos);
-		setBehaviour(m_fleeBehaviour);
-	} 
-	else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
-		if (getBehaviour() != m_followPathBehaviour.get()) {
-			setBehaviour(m_followPathBehaviour);
-			m_path->clear();
-		}
+	if (input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL)) {
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
+			m_seekBehaviour->setTarget(mousePos);
+			setBehaviour(m_seekBehaviour);
+		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
+			m_fleeBehaviour->setTarget(mousePos);
+			setBehaviour(m_fleeBehaviour);
+		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
+			if (getBehaviour() != m_followPathBehaviour.get()) {
+				setBehaviour(m_followPathBehaviour);
+				m_path->clear();
+			}
 
-		m_path->addPathSegment(mousePos);
+			m_path->addPathSegment(mousePos);
+		}
 	}
 
-	if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty()) {
+	if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() && !input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL)) {
 		setBehaviour(m_keyboardBehaviour);
 	}
 }

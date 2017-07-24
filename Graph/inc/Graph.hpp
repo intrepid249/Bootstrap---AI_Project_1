@@ -48,6 +48,10 @@ public:
 		}
 	}
 
+	void clear() {
+		m_nodes.clear();
+	}
+
 	Node *getNodeByIdx(int nodeID) {
 		return m_nodes[nodeID].get();
 	}

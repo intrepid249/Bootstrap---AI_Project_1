@@ -1,8 +1,9 @@
 #include <Graph\Graph2D.h>
+#include <glm\glm.hpp>
 
-void Graph2D::getNearbyNodes(glm::vec2 pos, float radius, std::vector<Node*>& nearbyNodes) {
+void Graph2D::getNearbyNodes(const glm::vec2 &pos, float radius, std::vector<Node*>& nearbyNodes) {
 	for (auto node : m_nodes) {
-		if (node->data.x - pos.x <= radius && node->data.y - pos.y <= radius)
+		if (glm::length(pos - node->data) < radius)
 			nearbyNodes.push_back(node.get());
 	}
 }

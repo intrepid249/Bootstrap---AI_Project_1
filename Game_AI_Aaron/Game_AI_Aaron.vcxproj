@@ -94,6 +94,7 @@
     <ClCompile Include="src\Behaviours\BFollowPath.cpp" />
     <ClCompile Include="src\Behaviours\BKeyboardControlled.cpp" />
     <ClCompile Include="src\Behaviours\BSeek.cpp" />
+    <ClCompile Include="src\Blackboard\Blackboard.cpp" />
     <ClCompile Include="src\Components\CBehaviourController.cpp" />
     <ClCompile Include="src\Components\CKeyboardController.cpp" />
     <ClCompile Include="src\Entities\GameObject.cpp" />
@@ -110,6 +111,7 @@
     <ClInclude Include="inc\Behaviours\BFollowPath.h" />
     <ClInclude Include="inc\Behaviours\BKeyboardControlled.h" />
     <ClInclude Include="inc\Behaviours\BSeek.h" />
+    <ClInclude Include="inc\Blackboard\Blackboard.h" />
     <ClInclude Include="inc\Components\CBehaviourController.h" />
     <ClInclude Include="inc\Components\CKeyboardController.h" />
     <ClInclude Include="inc\Components\JM_Component.h" />
@@ -117,6 +119,7 @@
     <ClInclude Include="inc\Entities\Player.h" />
     <ClInclude Include="inc\Game_AI_AaronApp.h" />
     <ClInclude Include="inc\GlobalConfig.h" />
+    <ClInclude Include="inc\global_types.hpp" />
     <ClInclude Include="inc\Graph\Graph2D.h" />
     <ClInclude Include="inc\Graph\Graph2DRenderer.h" />
     <ClInclude Include="inc\Graph\Path.h" />

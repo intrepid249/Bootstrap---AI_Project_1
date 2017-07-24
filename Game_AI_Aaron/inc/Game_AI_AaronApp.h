@@ -22,6 +22,8 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
+	void generateGraph();
+
 protected:
 	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
