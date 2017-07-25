@@ -63,8 +63,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 		static int spacing = 50;
 		static int xOffset = 50, yOffset = 50;
 
-		ImGui::SliderInt("Rows", &rows, 2, ((windowSize.y) / spacing));
-		ImGui::SliderInt("Cols", &cols, 2, ((windowSize.x - xOffset) / spacing));
+		ImGui::SliderInt("Rows", &rows, 2, (int)((windowSize.y) / spacing));
+		ImGui::SliderInt("Cols", &cols, 2, (int)((windowSize.x - xOffset) / spacing));
 		
 		ImGui::Separator();
 
@@ -83,6 +83,7 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	ImGui::End();
 	ImGui::PopStyleColor();
 
+	updateGraph(deltaTime);
 
 	m_player->update(deltaTime);
 	m_player->wrapScreenBounds();
@@ -104,10 +105,37 @@ void Game_AI_AaronApp::draw() {
 	m_renderer->begin();
 
 	m_player->render(m_renderer.get());
-	m_graphRenderer->render(m_renderer.get());
+	drawGraph();
 
 	// done drawing sprites
 	m_renderer->end();
+}
+
+void Game_AI_AaronApp::drawGraph() {
+	m_graphRenderer->render(m_renderer.get());
+
+	// Get configuration information about the graph
+	INI<> *ini = GlobalConfig::getInstance();
+	ini->select("WorldOptions");
+
+	int spacing = ini->get("GraphSpacing", 1);
+
+	// Get the mouse coordinates
+	aie::Input *input = aie::Input::getInstance();
+	int mx, my;
+	input->getMouseXY(&mx, &my);
+	glm::vec2 mousePos(mx, my);
+
+	// Get the nodes near the mouse position
+	std::vector<Graph2D::Node*> nearbyNodes;
+	m_graph->getNearbyNodes(mousePos, spacing * 2.f, nearbyNodes);
+
+	for (auto node : nearbyNodes)
+		if (input->isKeyDown(aie::INPUT_KEY_LEFT_ALT)) {
+			m_renderer->setRenderColour(1, 1, 1, 0.4f);
+			m_renderer->drawLine(mousePos.x, mousePos.y, node->data.x, node->data.y);
+			m_renderer->setRenderColour(1, 1, 1, 1);
+		}
 }
 
 void Game_AI_AaronApp::generateGraph() {
@@ -130,7 +158,7 @@ void Game_AI_AaronApp::generateGraph() {
 	for (auto iter1 = nodes.begin(); iter1 != nodes.end(); iter1++) {
 		Graph2D::Node *nodeA = (*iter1).get();
 		std::vector<Graph2D::Node*> nearbyNodes;
-		m_graph->getNearbyNodes(nodeA->data, spacing * 2, nearbyNodes);
+		m_graph->getNearbyNodes(nodeA->data, spacing * 2.f, nearbyNodes);
 
 		// Loop through nearby nodes
 		for (auto iter2 = nearbyNodes.begin(); iter2 != nearbyNodes.end(); iter2++) {
@@ -140,6 +168,36 @@ void Game_AI_AaronApp::generateGraph() {
 
 			int distBetweenNodes = (int)glm::length(nodeB->data - nodeA->data);
 			m_graph->addEdge(nodeA, nodeB, true, distBetweenNodes);
+		}
+	}
+}
+
+void Game_AI_AaronApp::updateGraph(float deltaTime) {
+	m_graphRenderer->update(deltaTime);
+
+	// Get configuration information about the graph
+	INI<> *ini = GlobalConfig::getInstance();
+	ini->select("WorldOptions");
+
+	int spacing = ini->get("GraphSpacing", 1);
+
+	// Get the mouse coordinates
+	aie::Input *input = aie::Input::getInstance();
+	int mx, my;
+	input->getMouseXY(&mx, &my);
+	glm::vec2 mousePos(mx, my);
+
+	if (input->isKeyDown(aie::INPUT_KEY_LEFT_ALT)) {
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
+			// Get the nodes near the mouse position
+			std::vector<Graph2D::Node*> nearbyNodes;
+			m_graph->getNearbyNodes(mousePos, spacing * 2, nearbyNodes);
+
+			int addedNode = m_graph->addNode(mousePos);
+
+			for (auto node : nearbyNodes) {
+				m_graph->addEdge(node, m_graph->getNodeByIdx(addedNode), true, (int)glm::length(m_graph->getNodeByIdx(addedNode)->data - node->data));
+			}
 		}
 	}
 }
