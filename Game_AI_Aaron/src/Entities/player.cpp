@@ -16,7 +16,7 @@
 #include <imgui.h>
 
 
-Player::Player() : GameObject(), m_startNode(nullptr), m_endNode(nullptr) {
+Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_endNode(nullptr) {
 	m_font = std::unique_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 18));
 
 	setFriction(1);
@@ -121,14 +121,16 @@ void Player::update(float deltaTime) {
 					return n == m_endNode;
 				});
 
-				while (m_pathfinder->pathFound()) {
+				while (!m_pathfinder->pathFound()) {
 					m_pathfinder->updateSearch();
 				}
-				Path p = m_pathfinder->getPath();
-					
+
 				m_path->clear();
-				m_path->addPathSegment(m_startNode->data);
-				m_path->addPathSegment(m_endNode->data);
+				Path &p = m_pathfinder->getPath();
+				auto pathPoints = p.getPath();
+				for (auto iter = pathPoints.rbegin(); iter != pathPoints.rend(); iter++) {
+					m_path->addPathSegment((*iter));
+				}
 
 				setBehaviour(m_followPathBehaviour);
 			}
@@ -148,20 +150,6 @@ void Player::update(float deltaTime) {
 
 void Player::render(aie::Renderer2D * renderer) {
 	GameObject::render(renderer);
-
-#ifdef _DEBUG
-	if (m_startNode != nullptr) {
-		renderer->setRenderColour(0.2, 0.8, 0.1, 1);
-		renderer->drawCircle(m_startNode->data.x, m_startNode->data.y, 6, 1);
-		renderer->setRenderColour(1, 1, 1, 1);
-	}
-
-	if (m_endNode != nullptr) {
-		renderer->setRenderColour(0.8, 0.2, 0.1, 1);
-		renderer->drawCircle(m_endNode->data.x, m_endNode->data.y, 6, 1);
-		renderer->setRenderColour(1, 1, 1, 1);
-	}
-#endif // _DEBUG
 
 	char buffer[64];
 	if (m_behaviour == m_keyboardBehaviour)

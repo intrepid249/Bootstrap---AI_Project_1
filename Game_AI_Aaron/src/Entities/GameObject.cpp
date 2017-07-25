@@ -6,8 +6,9 @@
 
 #include <Renderer2D.h>
 #include <glm\glm.hpp>
+#include <Texture.h>
 
-GameObject::GameObject() : m_friction(0.0f), m_drawn(true) {
+GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_drawn(true) {
 }
 
 GameObject::~GameObject() {
@@ -31,12 +32,17 @@ void GameObject::update(float deltaTime) {
 
 void GameObject::render(aie::Renderer2D * renderer) {
 	if (isDrawn()) {
+		glm::vec2 targetHeading = m_pos + m_velocity;
+		float rot = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
+
+		if (m_tex != nullptr)
+			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, 0, 0, rot);
+
 #ifdef _DEBUG
 		renderer->drawCircle(m_pos.x, m_pos.y, 3);
 
 		// Draw the heading/velocity
 		renderer->setRenderColour(0xFF7F00FF);
-		glm::vec2 targetHeading = m_pos + m_velocity;
 		renderer->drawLine(m_pos.x, m_pos.y, targetHeading.x, targetHeading.y, 2.f);
 		renderer->setRenderColour(0xFFFFFFFF);
 
@@ -48,7 +54,6 @@ void GameObject::render(aie::Renderer2D * renderer) {
 
 		// Draw the lookat rotation - used to rotate sprites properly according to movement
 		renderer->setRenderColour(0xFF007FFF);
-		float rot = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
 		renderer->drawCircle(m_pos.x + cosf(rot) * 20, m_pos.y + sinf(rot) * 20, 2);
 		renderer->setRenderColour(0xFFFFFFFF);
 #endif // _DEBUG

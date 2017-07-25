@@ -13,6 +13,8 @@
 #include "Entities\Player.h"
 #include "Graph\Graph2D.h"
 
+#include "ResourceManager.h"
+
 Game_AI_AaronApp::Game_AI_AaronApp() {
 
 }
@@ -33,12 +35,13 @@ bool Game_AI_AaronApp::startup() {
 	m_graphRenderer = std::unique_ptr<Graph2DRenderer>(new Graph2DRenderer());
 	m_graphRenderer->setGraph(m_graph.get());
 
-
 	/// Resources
+	ResourceManager::create();
+	ResourceManager::getTextures()["player"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/ship.png"));
 
 
 	/// Game Objects
-	m_player = std::unique_ptr<Player>(new Player());
+	m_player = std::unique_ptr<Player>(new Player(ResourceManager::getTextures()["player"].get()));
 	m_player->setPos(glm::vec2(getWindowWidth() * 0.5f, getWindowHeight() * 0.5f));
 	m_player->setGraph(m_graph.get());
 
@@ -47,6 +50,7 @@ bool Game_AI_AaronApp::startup() {
 }
 
 void Game_AI_AaronApp::shutdown() {
+	ResourceManager::destroy();
 }
 
 void Game_AI_AaronApp::update(float deltaTime) {

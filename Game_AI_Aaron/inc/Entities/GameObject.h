@@ -11,11 +11,12 @@ class Behaviour;
 class JM_Component;
 namespace aie {
 	class Renderer2D;
+	class Texture;
 };
 
 class GameObject {
 public:
-	GameObject();
+	GameObject(aie::Texture *tex = nullptr);
 	virtual ~GameObject();
 
 	virtual void update(float dt);
@@ -55,6 +56,8 @@ protected:
 	glm::vec2 m_pos, m_velocity, m_acceleration;
 	float m_friction;
 	bool m_drawn;
+
+	aie::Texture *m_tex;
 
 	std::vector<std::shared_ptr<JM_Component>> m_components;
 	std::shared_ptr<Behaviour> m_behaviour;

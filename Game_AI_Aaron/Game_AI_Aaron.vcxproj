@@ -106,6 +106,7 @@
     <ClCompile Include="src\Graph\Path.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Pathfinding\Pathfinder.cpp" />
+    <ClCompile Include="src\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Behaviours\Behaviour.h" />
@@ -120,11 +121,11 @@
     <ClInclude Include="inc\Entities\Player.h" />
     <ClInclude Include="inc\Game_AI_AaronApp.h" />
     <ClInclude Include="inc\GlobalConfig.h" />
-    <ClInclude Include="inc\global_types.hpp" />
     <ClInclude Include="inc\Graph\Graph2D.h" />
     <ClInclude Include="inc\Graph\Graph2DRenderer.h" />
     <ClInclude Include="inc\Graph\Path.h" />
     <ClInclude Include="inc\Pathfinding\Pathfinder.h" />
+    <ClInclude Include="inc\ResourceManager.h" />
     <ClInclude Include="inc\Utilities\Colour.h" />
     <ClInclude Include="inc\Utilities\jm_utilities.h" />
   </ItemGroup>

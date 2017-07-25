@@ -4,6 +4,11 @@ Pathfinder::Pathfinder(Graph2D *graph) : m_pathFound(false), m_graph(graph) {
 }
 
 Pathfinder::~Pathfinder() {
+	for (auto node : m_open)
+		delete node;
+	for (auto node : m_closed)
+		delete node;
+
 	m_open.clear();
 	m_closed.clear();
 }
@@ -19,12 +24,12 @@ Graph2D * Pathfinder::getGraph() {
 void Pathfinder::findPath(Graph2D::Node * startNode, std::function<bool(Graph2D::Node*)> isGoalNodeCallback) {
 	m_isGoalNode = isGoalNodeCallback;
 
-	std::unique_ptr<Node> node = std::unique_ptr<Node>(new Node());
+	Node *node = new Node();
 	node->node = startNode;
 	node->gScore = 0;
 	node->parent = nullptr;
 
-	m_open.push_back(std::move(node));
+	m_open.push_back(node);
 
 	m_pathFound = false;
 }
@@ -38,12 +43,13 @@ void Pathfinder::updateSearch() {
 		m_pathFound = true;
 
 	if (!m_pathFound) {
-		std::unique_ptr<Node> node = std::move(m_open.back());
+		Node * node = m_open.back();
 		m_open.pop_back();
 		m_closed.push_back(node);
 
 		if (m_isGoalNode && m_isGoalNode(node->node)) {
-			// TODO: calculate path
+			calculatePath(node);
+			
 			m_pathFound = true;
 			return;
 		}
@@ -56,11 +62,49 @@ void Pathfinder::updateSearch() {
 			int cost = edge.data;
 			float gScore = node->gScore + cost;
 
-			// TypeHere
+			Node *nodeInList = getNodeInList(m_open, child);
+			if (nodeInList == nullptr)
+				nodeInList = getNodeInList(m_closed, child);
+
+			if (nodeInList == nullptr) {
+				Node *newNode = new Node();
+				newNode->node = child;
+				newNode->gScore = gScore;
+				newNode->parent = node;
+
+				m_open.push_back(newNode);
+			} else {
+				if (nodeInList->gScore > gScore) {
+					nodeInList->parent = node;
+					nodeInList->gScore = gScore;
+				}
+			}
 		}
+
+		m_open.sort([this](Node *a, Node *b) {
+			return a->gScore > b->gScore;
+		});
 	}
 }
 
 Path & Pathfinder::getPath() {
 	return m_path;
+}
+
+Pathfinder::Node * Pathfinder::getNodeInList(std::list<Node*> list, Graph2D::Node * node) {
+	for (auto iter = list.begin(); iter != list.end(); iter++) {
+		if ((*iter)->node == node)
+			return (*iter);
+	}
+	return nullptr;
+}
+
+void Pathfinder::calculatePath(Node * goal) {
+	m_path.clear();
+	Node *current = goal;
+	while (current != nullptr) {
+		m_path.addPathSegment(current->node->data);
+
+		current = current->parent;
+	}
 }

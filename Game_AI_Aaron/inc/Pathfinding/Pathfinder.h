@@ -35,7 +35,9 @@ protected:
 	bool m_pathFound;
 	Path m_path;
 
-	std::list<std::unique_ptr<Node>> m_open, m_closed;
+	std::list<Node *> m_open, m_closed;
 
 private:
+	Node *getNodeInList(std::list<Node *> list, Graph2D::Node *node);
+	void calculatePath(Node *goal);
 };

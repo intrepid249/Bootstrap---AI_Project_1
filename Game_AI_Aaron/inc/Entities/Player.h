@@ -13,12 +13,13 @@ class Pathfinder;
 
 namespace aie {
 	class Font;
+	class Texture;
 }
 
 
 class Player : public GameObject {
 public:
-	Player();
+	Player(aie::Texture *tex = nullptr);
 	virtual ~Player();
 
 	virtual void update(float deltaTime);
