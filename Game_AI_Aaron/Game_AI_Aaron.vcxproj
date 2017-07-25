@@ -105,6 +105,7 @@
     <ClCompile Include="src\Graph\Graph2DRenderer.cpp" />
     <ClCompile Include="src\Graph\Path.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Pathfinding\Pathfinder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Behaviours\Behaviour.h" />
@@ -123,6 +124,7 @@
     <ClInclude Include="inc\Graph\Graph2D.h" />
     <ClInclude Include="inc\Graph\Graph2DRenderer.h" />
     <ClInclude Include="inc\Graph\Path.h" />
+    <ClInclude Include="inc\Pathfinding\Pathfinder.h" />
     <ClInclude Include="inc\Utilities\Colour.h" />
     <ClInclude Include="inc\Utilities\jm_utilities.h" />
   </ItemGroup>

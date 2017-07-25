@@ -1,9 +1,11 @@
 #include "Entities\Player.h"
+
 #include "Behaviours\BKeyboardControlled.h"
 #include "Behaviours\BSeek.h"
+#include "Behaviours\BFollowPath.h"
 
 #include "Graph\Path.h"
-#include "Behaviours\BFollowPath.h"
+#include "Pathfinding\Pathfinder.h"
 
 #include "GlobalConfig.h"
 
@@ -13,7 +15,8 @@
 
 #include <imgui.h>
 
-Player::Player() : GameObject() {
+
+Player::Player() : GameObject(), m_startNode(nullptr), m_endNode(nullptr) {
 	m_font = std::unique_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 18));
 
 	setFriction(1);
@@ -55,7 +58,6 @@ Player::Player() : GameObject() {
 }
 
 Player::~Player() {
-	setBehaviour(nullptr);
 }
 
 void Player::update(float deltaTime) {
@@ -98,13 +100,68 @@ void Player::update(float deltaTime) {
 		}
 	}
 
-	if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() && !input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL)) {
+	if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT)) {
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
+			std::vector<Graph2D::Node*> nearbyNodes;
+			m_graph->getNearbyNodes(mousePos, 15, nearbyNodes);
+
+			if (!nearbyNodes.empty()) {
+				m_startNode = nearbyNodes[0];
+			}
+		}
+
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
+			std::vector<Graph2D::Node*> nearbyNodes;
+			m_graph->getNearbyNodes(mousePos, 15, nearbyNodes);
+
+			if (!nearbyNodes.empty()) {
+				m_endNode = nearbyNodes[0];
+				m_pathfinder = std::move(std::unique_ptr<Pathfinder>(new Pathfinder()));
+				m_pathfinder->findPath(m_startNode, [this](Graph2D::Node *n) {
+					return n == m_endNode;
+				});
+
+				while (m_pathfinder->pathFound()) {
+					m_pathfinder->updateSearch();
+				}
+				Path p = m_pathfinder->getPath();
+					
+				m_path->clear();
+				m_path->addPathSegment(m_startNode->data);
+				m_path->addPathSegment(m_endNode->data);
+
+				setBehaviour(m_followPathBehaviour);
+			}
+		}
+
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
+			m_startNode = m_endNode = nullptr;
+			m_pathfinder = std::move(std::unique_ptr<Pathfinder>());
+		}
+	}
+
+	if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() &&
+		!(input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL) || input->isKeyDown(aie::INPUT_KEY_LEFT_ALT) || input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT))) {
 		setBehaviour(m_keyboardBehaviour);
 	}
 }
 
 void Player::render(aie::Renderer2D * renderer) {
 	GameObject::render(renderer);
+
+#ifdef _DEBUG
+	if (m_startNode != nullptr) {
+		renderer->setRenderColour(0.2, 0.8, 0.1, 1);
+		renderer->drawCircle(m_startNode->data.x, m_startNode->data.y, 6, 1);
+		renderer->setRenderColour(1, 1, 1, 1);
+	}
+
+	if (m_endNode != nullptr) {
+		renderer->setRenderColour(0.8, 0.2, 0.1, 1);
+		renderer->drawCircle(m_endNode->data.x, m_endNode->data.y, 6, 1);
+		renderer->setRenderColour(1, 1, 1, 1);
+	}
+#endif // _DEBUG
 
 	char buffer[64];
 	if (m_behaviour == m_keyboardBehaviour)
@@ -117,4 +174,12 @@ void Player::render(aie::Renderer2D * renderer) {
 		sprintf_s(buffer, "Follow Path");
 
 	renderer->drawText(m_font.get(), buffer, 10, 10);
+}
+
+void Player::setGraph(Graph2D * graph) {
+	m_graph = graph;
+}
+
+Graph2D * Player::getGraph() {
+	return m_graph;
 }

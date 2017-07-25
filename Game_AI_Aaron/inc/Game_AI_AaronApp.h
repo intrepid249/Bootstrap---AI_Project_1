@@ -4,6 +4,9 @@
 #include <Graph\Graph2D.h>
 #include <Graph\Graph2DRenderer.h>
 
+#include "Entities\Player.h"
+
+
 namespace aie {
 	class Renderer2D;
 	class Font;
@@ -29,8 +32,11 @@ public:
 protected:
 	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
-	std::unique_ptr<GameObject> m_player = nullptr;
+	std::unique_ptr<Player> m_player = nullptr;
 
 	std::unique_ptr<Graph2D> m_graph;
 	std::unique_ptr<Graph2DRenderer> m_graphRenderer;
+
+	int m_graphSpacing;
+	glm::vec2 m_mousePos;
 };

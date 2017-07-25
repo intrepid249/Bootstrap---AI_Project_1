@@ -4,8 +4,6 @@
 #include "Components\JM_Component.h"
 #include "Behaviours\Behaviour.h"
 
-#include "Behaviours\BKeyboardControlled.h"
-
 #include <Renderer2D.h>
 #include <glm\glm.hpp>
 

@@ -46,8 +46,9 @@ int main() {
 	signal(SIGTERM, cleanMemory); /// Termination request
 	signal(SIGSEGV, cleanMemory); /// Invalid access to storage
 
-								  ///OpenGL
-								  // initialise GLFW so we can tweak some OpenGL settings
+
+	///OpenGL
+	// initialise GLFW so we can tweak some OpenGL settings
 	glfwInit();
 	// disable the window resizing
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
@@ -58,18 +59,18 @@ int main() {
 	/// Configuration
 	// Load settings in from config file
 
-	GlobalConfig::create("config/settings.ini");
+	system("mkdir config"); // Ensure configuration file directory exists
 
-	system("mkdir config");
+	GlobalConfig::create("config/settings.ini");
 	ini_t *ini = GlobalConfig::getInstance();
 	ini->save();
 
 	ini->select("DisplayOptions");
 
 	std::string title = ini->get("WindowTitle");
-	int ScreenWidth = ini->get("WindowWidth", 1);
-	int ScreenHeight = ini->get("WindowHeight", 1);
-	bool fullscreen = ini->get("Fullscreen", 1);
+	int ScreenWidth = ini->get("WindowWidth", int());
+	int ScreenHeight = ini->get("WindowHeight", int());
+	bool fullscreen = ini->get("Fullscreen", int());
 
 	app = new Game_AI_AaronApp();
 	app->run(title.c_str(), ScreenWidth, ScreenHeight, fullscreen);
