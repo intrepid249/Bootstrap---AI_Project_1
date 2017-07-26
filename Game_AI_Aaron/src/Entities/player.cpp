@@ -29,6 +29,7 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 	m_seekBehaviour->setParent(this);
 	m_seekBehaviour->setStrength(100);
 	m_seekBehaviour->setInnerRadius(20);
+	m_seekBehaviour->setOuterRadius(200);
 	m_seekBehaviour->onInnerRadiusEnter([this]() {
 		setBehaviour(m_keyboardBehaviour);
 	});

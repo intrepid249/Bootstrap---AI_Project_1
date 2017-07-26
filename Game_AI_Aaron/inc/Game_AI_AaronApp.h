@@ -27,6 +27,8 @@ public:
 
 	void drawGraph();
 	void generateGraph();
+	bool generateGraphFromFile();
+	void generateGraphEdges();
 	void updateGraph(float deltaTime);
 
 protected:

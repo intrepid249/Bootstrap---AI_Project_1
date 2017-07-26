@@ -12,6 +12,8 @@ BKeyboardControlled::~BKeyboardControlled() {
 }
 
 void BKeyboardControlled::entryActions() {
+	// Reset the friction, in case of modification
+	m_parentObject->setFriction(1);
 }
 
 void BKeyboardControlled::doActions(float deltaTime) {

@@ -54,6 +54,7 @@ public:
 
 protected:
 	glm::vec2 m_pos, m_velocity, m_acceleration;
+	const float maxSpeed = 100;
 	float m_friction;
 	bool m_drawn;
 

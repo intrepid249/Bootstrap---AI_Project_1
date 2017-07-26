@@ -1,6 +1,7 @@
 #include "Entities\GameObject.h"
 
 #include "GlobalConfig.h"
+#include "Utilities\jm_utilities.h"
 #include "Components\JM_Component.h"
 #include "Behaviours\Behaviour.h"
 
@@ -19,6 +20,8 @@ void GameObject::update(float deltaTime) {
 		applyForce(m_friction * -m_velocity);
 
 		m_velocity += m_acceleration * deltaTime;
+		//truncate(m_velocity, maxSpeed);
+
 		m_pos += m_velocity * deltaTime;
 		m_acceleration = glm::vec2();
 
@@ -37,8 +40,11 @@ void GameObject::render(aie::Renderer2D * renderer) {
 
 		if (m_tex != nullptr)
 			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, 0, 0, rot);
+		else
+			renderer->drawBox(m_pos.x, m_pos.y, 10, 10, 0.2);
 
 #ifdef _DEBUG
+		// Draw a dot at the object's position
 		renderer->drawCircle(m_pos.x, m_pos.y, 3);
 
 		// Draw the heading/velocity
@@ -99,6 +105,8 @@ bool GameObject::isDrawn() {
 }
 void GameObject::setBehaviour(std::shared_ptr<Behaviour> behaviour) {
 	m_behaviour = behaviour;
+	if (m_behaviour)
+		m_behaviour->entryActions();
 }
 Behaviour * GameObject::getBehaviour() {
 	return m_behaviour.get();

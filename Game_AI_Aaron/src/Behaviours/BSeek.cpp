@@ -17,8 +17,9 @@ void BSeek::entryActions() {
 
 void BSeek::doActions(float deltaTime) {
 	if (m_parentObject != nullptr) {
+		glm::vec2 desired_velocity = m_targetPos - m_parentObject->getPos();
 		float last_dist_to_target = glm::length(m_targetPos - m_lastPos);
-		float dist_to_target = glm::length(m_targetPos - m_parentObject->getPos());
+		float dist_to_target = glm::length(desired_velocity);
 
 		if (m_onInnerRadiusEnter && last_dist_to_target > m_innerRadius && dist_to_target <= m_innerRadius)
 			// If we have just entered the destination zone
@@ -28,16 +29,21 @@ void BSeek::doActions(float deltaTime) {
 			m_onInnerRadiusExit();
 		if (m_onOuterRadiusEnter && last_dist_to_target > m_outerRadius && dist_to_target <= m_outerRadius)
 			// If we have just entered the agro zone
-			m_onOuterRadiusEnter();
+				m_onOuterRadiusEnter();
 		if (m_onOuterRadiusExit && last_dist_to_target <= m_outerRadius && dist_to_target > m_outerRadius)
 			// If we have just left the agro zone
 			m_onOuterRadiusExit();
 
 
+		if (dist_to_target <= m_outerRadius)
+			// Perform arrival behaviour
+			desired_velocity = glm::normalize(desired_velocity) * (dist_to_target / m_outerRadius) * m_strength;
+		else {
+			desired_velocity = glm::normalize(desired_velocity) * m_strength;
+		}
 
-		glm::vec2 dir_to_target = glm::normalize(m_targetPos - m_parentObject->getPos()) * m_strength;
 
-		m_parentObject->applyForce(dir_to_target);
+		m_parentObject->applyForce(desired_velocity);
 
 
 		m_lastPos = m_parentObject->getPos();

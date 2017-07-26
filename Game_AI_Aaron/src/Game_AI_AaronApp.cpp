@@ -5,6 +5,10 @@
 #include <Input.h>
 #include <glm\glm.hpp>
 
+#include <fstream>
+#include <ios>
+#include <Windows.h>
+
 #include <imgui.h>
 #define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
@@ -28,8 +32,14 @@ bool Game_AI_AaronApp::startup() {
 	m_renderer = std::shared_ptr<aie::Renderer2D>(new aie::Renderer2D());
 
 	/// Graph
+	// Read configuration settings
+	INI<> *ini = GlobalConfig::getInstance();
+	ini->select("WorldOptions");
+	m_graphSpacing = ini->get("GraphSpacing", int());
+	// Generate the graph
 	m_graph = std::unique_ptr<Graph2D>(new Graph2D());
-	generateGraph();
+	if (!generateGraphFromFile())
+		generateGraph();
 
 	/// Draw graph
 	m_graphRenderer = std::unique_ptr<Graph2DRenderer>(new Graph2DRenderer());
@@ -82,7 +92,7 @@ void Game_AI_AaronApp::update(float deltaTime) {
 
 	if (ImGui::CollapsingHeader("Graph")) {
 		ini->select("DisplayOptions");
-		glm::vec2 windowSize(ini->get("WindowWidth", 1), ini->get("WindowHeight", 1));
+		glm::vec2 windowSize(ini->get("WindowWidth", int()), ini->get("WindowHeight", int()));
 
 		static int rows = 2, cols = 2;
 		static int spacing = 50;
@@ -100,8 +110,27 @@ void Game_AI_AaronApp::update(float deltaTime) {
 			ini->select("WorldOptions");
 			ini->set("GraphRows", rows);
 			ini->set("GraphCols", cols);
+			ini->save();
 
 			generateGraph();
+		}
+		ImGui::SameLine(125);
+
+		if (ImGui::Button("Save Graph")) {
+			// Load file for writing
+			std::fstream graphFile("config\graph.gdat", std::ios::out | std::ios::binary);
+
+			for (auto node : m_graph->getNodes()) {
+				graphFile.write((char*)&node->data, sizeof(node->data));
+			}
+
+			graphFile.close();
+		}
+		ImGui::SameLine(230);
+
+		if (ImGui::Button("Load Graph Data")) {
+			if (!generateGraphFromFile())
+				MessageBox(NULL, L"Error loading graph information from file! Either the file does not exist, or contains no data", L"Bad graph data!", MB_OK | MB_ICONWARNING);
 		}
 	}
 
@@ -163,7 +192,6 @@ void Game_AI_AaronApp::generateGraph() {
 	ini->select("WorldOptions");
 
 	int numRows = ini->get("GraphRows", int()), numCols = ini->get("GraphCols", int());
-	m_graphSpacing = ini->get("GraphSpacing", int());
 	int xOffset = ini->get("GraphXOffset", int()), yOffset = ini->get("GraphYOffset", int());
 
 	// Populate the graph with data
@@ -173,6 +201,34 @@ void Game_AI_AaronApp::generateGraph() {
 		}
 	}
 
+	generateGraphEdges();
+}
+
+bool Game_AI_AaronApp::generateGraphFromFile() {
+	// Load file for reading
+	std::fstream graphFile("config\graph.gdat", std::ios::in | std::ios::binary);
+
+	// Check for reading errors
+	if ((graphFile.rdstate() & std::fstream::failbit) != 0) {
+		ImGui::End();
+		ImGui::PopStyleColor();
+		return false;
+	}
+
+	m_graph->clear();
+
+	while (!graphFile.eof() && graphFile.peek() != EOF) {
+		Graph2D::Node tmpNode;
+		graphFile.read((char *)&tmpNode.data, sizeof(tmpNode.data));
+		m_graph->addNode(tmpNode.data);
+	}
+	generateGraphEdges();
+
+	graphFile.close();
+	return true;
+}
+
+void Game_AI_AaronApp::generateGraphEdges() {
 	// Connect all nearby nodes
 	auto &nodes = m_graph->getNodes();
 	for (auto iter1 = nodes.begin(); iter1 != nodes.end(); iter1++) {
