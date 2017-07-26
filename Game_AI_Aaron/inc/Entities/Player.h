@@ -41,4 +41,6 @@ protected:
 	std::unique_ptr<aie::Font> m_font;
 
 private:
+	const char *m_algorithm;
+
 };

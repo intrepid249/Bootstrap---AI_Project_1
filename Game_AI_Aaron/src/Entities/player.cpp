@@ -63,18 +63,22 @@ Player::~Player() {
 
 void Player::update(float deltaTime) {
 
-	// Add a live debugging window
-#ifdef _DEBUG
+	// Live debugging window
 	ImGui::Begin("Debugging");
 
 	if (ImGui::CollapsingHeader("AI")) {
 		static bool flag = false;
 		if (ImGui::Checkbox("Patrolling", &flag));
 		m_followPathBehaviour->isPatrolling(flag);
+
+		// Add a tree
+		const char* pathfindingAlgorithms[] = { "dijkstra", "astar" };
+		static int itemIndex = 0;
+		ImGui::Combo("Combo", &itemIndex, pathfindingAlgorithms, IM_ARRAYSIZE(pathfindingAlgorithms));
+		m_algorithm = pathfindingAlgorithms[itemIndex];
 	}
 	
 	ImGui::End();
-#endif // _DEBUG
 
 	GameObject::update(deltaTime);
 
@@ -118,9 +122,12 @@ void Player::update(float deltaTime) {
 			if (!nearbyNodes.empty()) {
 				m_endNode = nearbyNodes[0];
 				m_pathfinder = std::move(std::unique_ptr<Pathfinder>(new Pathfinder()));
-				m_pathfinder->findPath(m_startNode, [this](Graph2D::Node *n) {
-					return n == m_endNode;
-				});
+
+				if (m_algorithm == "dijkstra") {
+					m_pathfinder->findPath(m_startNode, [this](Graph2D::Node *n) {
+						return n == m_endNode;
+					});
+				} else if (m_algorithm == "astar");
 
 				while (!m_pathfinder->pathFound()) {
 					m_pathfinder->updateSearch();

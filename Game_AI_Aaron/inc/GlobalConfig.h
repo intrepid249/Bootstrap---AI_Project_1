@@ -1,5 +1,8 @@
 #pragma once
 #include <INI.h>
+
+#define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
+
 typedef INI<> ini_t;
 
 class GlobalConfig {

@@ -10,7 +10,6 @@
 #include <Windows.h>
 
 #include <imgui.h>
-#define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
 #include "GlobalConfig.h"
 #include "Entities\GameObject.h"
@@ -82,13 +81,6 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	ImGui::BulletText("Left Mouse Button: Set the start node of the path");
 	ImGui::BulletText("Middle Mouse Button: Clear the path information");
 	ImGui::BulletText("Right Mouse Button: Set the end node of the path");
-
-	//const char* items[] = { "AAAA", "BBBB" };
-	//static int itemIndex = -1;
-	//ImGui::Combo("Combo", &itemIndex, items, IM_ARRAYSIZE(items));
-	//if (itemIndex == 1) {
-	//	quit();
-	//}
 
 	if (ImGui::CollapsingHeader("Graph")) {
 		ini->select("DisplayOptions");
