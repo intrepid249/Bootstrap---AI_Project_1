@@ -46,7 +46,10 @@ bool Game_AI_AaronApp::startup() {
 
 	/// Resources
 	ResourceManager::create();
+	// Textures
 	ResourceManager::getTextures()["player"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/ship.png"));
+	// Fonts
+	ResourceManager::getFonts()["default"] = std::shared_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 32));
 
 
 	/// Game Objects
@@ -110,7 +113,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 
 		if (ImGui::Button("Save Graph")) {
 			// Load file for writing
-			std::fstream graphFile("config\graph.gdat", std::ios::out | std::ios::binary);
+
+			std::fstream graphFile("config/graph.gdat", std::ios::out | std::ios::binary);
 
 			for (auto node : m_graph->getNodes()) {
 				graphFile.write((char*)&node->data, sizeof(node->data));
@@ -132,7 +136,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	updateGraph(deltaTime);
 
 	m_player->update(deltaTime);
-	m_player->wrapScreenBounds();
+	m_player->constrainToScreenBounds(true);
+	//m_player->wrapScreenBounds();
 
 	// input example
 	aie::Input* input = aie::Input::getInstance();
@@ -198,12 +203,10 @@ void Game_AI_AaronApp::generateGraph() {
 
 bool Game_AI_AaronApp::generateGraphFromFile() {
 	// Load file for reading
-	std::fstream graphFile("config\graph.gdat", std::ios::in | std::ios::binary);
+	std::fstream graphFile("config\\graph.gdat", std::ios::in | std::ios::binary);
 
 	// Check for reading errors
 	if ((graphFile.rdstate() & std::fstream::failbit) != 0) {
-		ImGui::End();
-		ImGui::PopStyleColor();
 		return false;
 	}
 

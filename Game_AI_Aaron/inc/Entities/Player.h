@@ -7,6 +7,7 @@
 class BKeyboardControlled;
 class BSeek;
 class BFollowPath;
+class BWander;
 
 class Path;
 class Pathfinder;
@@ -32,6 +33,7 @@ protected:
 	std::shared_ptr<BKeyboardControlled> m_keyboardBehaviour;
 	std::shared_ptr<BSeek> m_seekBehaviour, m_fleeBehaviour;
 	std::shared_ptr<BFollowPath> m_followPathBehaviour;
+	std::shared_ptr<BWander> m_wanderBehavour;
 
 	std::unique_ptr<Path> m_path;
 	Graph2D *m_graph;

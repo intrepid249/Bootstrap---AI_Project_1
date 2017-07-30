@@ -3,6 +3,8 @@
 
 #include <GlobalConfig.h>
 
+#include <time.h>
+
 #include <signal.h>
 #include <Windows.h>
 #include <iostream>
@@ -25,7 +27,7 @@ Game_AI_AaronApp *app;
 /** This function handles safe cleaning of memory in the event of system crash*/
 void cleanMemory(int signum) {
 	wchar_t buffer[256];
-	swprintf(buffer, L" Signal interrupt code (%d)\nPress ok to exit the application safely", signum);
+	swprintf_s(buffer, L" Signal interrupt code (%d)\nPress ok to exit the application safely", signum);
 
 	MessageBox(NULL, buffer, L"Error", MB_ICONERROR | MB_TASKMODAL | MB_OK);
 
@@ -37,6 +39,9 @@ void cleanMemory(int signum) {
 int main() {
 	// Check for any memory leaks
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	// Seed the random function
+	srand(time(NULL));
 
 	// Activate the signals to handle memory when the program encounters an error
 	signal(SIGINT, cleanMemory); /// Detection of interactive attention signal
@@ -70,7 +75,7 @@ int main() {
 	std::string title = ini->get("WindowTitle");
 	int ScreenWidth = ini->get("WindowWidth", int());
 	int ScreenHeight = ini->get("WindowHeight", int());
-	bool fullscreen = ini->get("Fullscreen", int());
+	bool fullscreen = ini->get("Fullscreen", bool());
 
 	app = new Game_AI_AaronApp();
 	app->run(title.c_str(), ScreenWidth, ScreenHeight, fullscreen);

@@ -1,4 +1,7 @@
 #include "Pathfinding\Pathfinder.h"
+#include <algorithm>
+#include <glm\vec2.hpp>
+#include <Renderer2D.h>
 
 Pathfinder::Pathfinder(Graph2D *graph) : m_pathFound(false), m_graph(graph) {
 }

@@ -6,6 +6,10 @@
 #include <list>
 #include <memory>
 
+namespace aie {
+	class Renderer2D;
+}
+
 class Pathfinder {
 protected:
 	struct Node {

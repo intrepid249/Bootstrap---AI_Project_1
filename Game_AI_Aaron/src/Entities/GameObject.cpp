@@ -41,7 +41,7 @@ void GameObject::render(aie::Renderer2D * renderer) {
 		if (m_tex != nullptr)
 			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, 0, 0, rot);
 		else
-			renderer->drawBox(m_pos.x, m_pos.y, 10, 10, 0.2);
+			renderer->drawBox(m_pos.x, m_pos.y, 10, 10, 0.2f);
 
 #ifdef _DEBUG
 		// Draw a dot at the object's position
@@ -52,16 +52,16 @@ void GameObject::render(aie::Renderer2D * renderer) {
 		renderer->drawLine(m_pos.x, m_pos.y, targetHeading.x, targetHeading.y, 2.f);
 		renderer->setRenderColour(0xFFFFFFFF);
 
+		// Draw the lookat rotation - used to rotate sprites properly according to movement
+		renderer->setRenderColour(0xFF007FFF);
+		renderer->drawCircle(m_pos.x + cosf(rot) * 20, m_pos.y + sinf(rot) * 20, 2);
+		renderer->setRenderColour(0xFFFFFFFF);
+
 		for (size_t i = 0; i < m_components.size(); ++i)
 			m_components[i]->render(renderer);
 
 		if (m_behaviour != nullptr)
 			m_behaviour->debugRender(renderer);
-
-		// Draw the lookat rotation - used to rotate sprites properly according to movement
-		renderer->setRenderColour(0xFF007FFF);
-		renderer->drawCircle(m_pos.x + cosf(rot) * 20, m_pos.y + sinf(rot) * 20, 2);
-		renderer->setRenderColour(0xFFFFFFFF);
 #endif // _DEBUG
 	}
 }
@@ -125,12 +125,24 @@ void GameObject::wrapScreenBounds() {
 	if (m_pos.y > winHeight) setPos(glm::vec2(0, m_pos.x));
 }
 
-void GameObject::constrainToScreenBounds() {
+void GameObject::constrainToScreenBounds(bool bounce) {
 	ini_t *cfg = GlobalConfig::getInstance();
-	int winWidth = cfg->get("DisplayOptions", "WindowWidth", 1);
-	int winHeight = cfg->get("DisplayOptions", "WindowHeight", 1);
+	float winWidth = cfg->get("DisplayOptions", "WindowWidth", float());
+	float winHeight = cfg->get("DisplayOptions", "WindowHeight", float());
+	float width = (m_tex != nullptr) ? (float)m_tex->getWidth() : 0;
+	float height = (m_tex != nullptr) ? (float)m_tex->getHeight() : 0;
 
-	
+	bool hitLeft = (m_pos.x - width / 2 < 0), hitRight = (m_pos.x + width / 2 > winWidth);
+	bool hitBottom = (m_pos.y - height / 2 < 0), hitTop = (m_pos.y + height / 2 > winHeight);
+
+	if (bounce) {
+		if (hitLeft || hitRight) {
+			setPos(glm::vec2(winWidth - width / 2, m_pos.y));
+			applyForce(glm::vec2(-(m_velocity.x * REFLECTION_FORCE), 0));
+		}
+	} else {
+
+	}
 }
 
 void GameObject::destroyOnExitScreen() {

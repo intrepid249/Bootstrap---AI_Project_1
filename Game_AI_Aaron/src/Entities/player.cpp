@@ -3,11 +3,13 @@
 #include "Behaviours\BKeyboardControlled.h"
 #include "Behaviours\BSeek.h"
 #include "Behaviours\BFollowPath.h"
+#include "Behaviours\BWander.h"
 
 #include "Graph\Path.h"
 #include "Pathfinding\Pathfinder.h"
 
 #include "GlobalConfig.h"
+#include "ResourceManager.h"
 
 #include <Font.h>
 #include <Input.h>
@@ -15,19 +17,19 @@
 
 #include <imgui.h>
 
+#include <iostream>
+
 
 Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_endNode(nullptr) {
-	m_font = std::unique_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 18));
-
 	setFriction(1);
 
 	m_keyboardBehaviour = std::shared_ptr<BKeyboardControlled>(new BKeyboardControlled());
 	m_keyboardBehaviour->setParent(this);
-	m_keyboardBehaviour->setStrength(100);
+	m_keyboardBehaviour->setStrength(200);
 
 	m_seekBehaviour = std::shared_ptr<BSeek>(new BSeek());
 	m_seekBehaviour->setParent(this);
-	m_seekBehaviour->setStrength(100);
+	m_seekBehaviour->setStrength(150);
 	m_seekBehaviour->setInnerRadius(20);
 	m_seekBehaviour->setOuterRadius(200);
 	m_seekBehaviour->onInnerRadiusEnter([this]() {
@@ -36,8 +38,8 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 
 	m_fleeBehaviour = std::shared_ptr<BSeek>(new BSeek());
 	m_fleeBehaviour->setParent(this);
-	m_fleeBehaviour->setStrength(-100);
-	m_fleeBehaviour->setOuterRadius(100);
+	m_fleeBehaviour->setStrength(-150);
+	m_fleeBehaviour->setOuterRadius(200);
 	m_fleeBehaviour->onOuterRadiusExit([this]() {
 		setBehaviour(m_keyboardBehaviour);
 	});
@@ -55,6 +57,12 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 			setBehaviour(m_keyboardBehaviour);
 	});
 
+	m_wanderBehavour = std::shared_ptr<BWander>(new BWander());
+	m_wanderBehavour->setParent(this);
+	//m_wanderBehavour->setStrength(250);
+	m_wanderBehavour->setProjectionDistance(100);
+	m_wanderBehavour->setRadius(20);
+
 	setBehaviour(m_keyboardBehaviour);
 }
 
@@ -67,9 +75,14 @@ void Player::update(float deltaTime) {
 	ImGui::Begin("Debugging");
 
 	if (ImGui::CollapsingHeader("AI")) {
-		static bool flag = false;
-		if (ImGui::Checkbox("Patrolling", &flag));
-		m_followPathBehaviour->isPatrolling(flag);
+		static bool patrolFlag = true;
+		if (ImGui::Checkbox("Patrolling", &patrolFlag))
+			m_followPathBehaviour->isPatrolling(patrolFlag);
+
+		static bool wanderFlag = false;
+		if (ImGui::Checkbox("Wander", &wanderFlag))
+			setBehaviour(m_wanderBehavour);
+
 
 		// Add a tree
 		const char* pathfindingAlgorithms[] = { "dijkstra", "astar" };
@@ -127,7 +140,9 @@ void Player::update(float deltaTime) {
 					m_pathfinder->findPath(m_startNode, [this](Graph2D::Node *n) {
 						return n == m_endNode;
 					});
-				} else if (m_algorithm == "astar");
+				} else if (m_algorithm == "astar") {
+
+				}
 
 				while (!m_pathfinder->pathFound()) {
 					m_pathfinder->updateSearch();
@@ -151,7 +166,8 @@ void Player::update(float deltaTime) {
 	}
 
 	if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() &&
-		!(input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL) || input->isKeyDown(aie::INPUT_KEY_LEFT_ALT) || input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT))) {
+		!(input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL) || input->isKeyDown(aie::INPUT_KEY_LEFT_ALT) 
+			|| input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT) || input->isKeyDown(aie::INPUT_KEY_ENTER))) {
 		setBehaviour(m_keyboardBehaviour);
 	}
 }
@@ -162,14 +178,18 @@ void Player::render(aie::Renderer2D * renderer) {
 	char buffer[64];
 	if (m_behaviour == m_keyboardBehaviour)
 		sprintf_s(buffer, "Keyboard");
-	if (m_behaviour == m_seekBehaviour)
+	else if (m_behaviour == m_seekBehaviour)
 		sprintf_s(buffer, "Seek");
-	if (m_behaviour == m_fleeBehaviour)
+	else if (m_behaviour == m_fleeBehaviour)
 		sprintf_s(buffer, "Flee");
-	if (m_behaviour == m_followPathBehaviour)
+	else if (m_behaviour == m_followPathBehaviour)
 		sprintf_s(buffer, "Follow Path");
+	else if (m_behaviour == m_wanderBehavour)
+		sprintf_s(buffer, "Wander");
+	else
+		sprintf_s(buffer, "Behaviour unknown");
 
-	renderer->drawText(m_font.get(), buffer, 10, 10);
+	renderer->drawText(ResourceManager::getFonts()["default"].get(), buffer, 10, 10);
 }
 
 void Player::setGraph(Graph2D * graph) {

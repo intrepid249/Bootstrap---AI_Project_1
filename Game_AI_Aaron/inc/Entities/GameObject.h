@@ -49,7 +49,7 @@ public:
 #pragma endregion
 
 	void wrapScreenBounds();
-	void constrainToScreenBounds();
+	void constrainToScreenBounds(bool bounce);
 	void destroyOnExitScreen();
 
 protected:
@@ -62,6 +62,9 @@ protected:
 
 	std::vector<std::shared_ptr<JM_Component>> m_components;
 	std::shared_ptr<Behaviour> m_behaviour;
+
+	// Used to compound the force when 'Bouncing' off objects
+	const float REFLECTION_FORCE = 250;
 
 private:
 };
