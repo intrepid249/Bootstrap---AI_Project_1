@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DEA49362-B428-4215-8D64-4EA0B4FF0858}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Game_AI_Aaron</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)dependencies\timer\src;$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\$(Configuration)\</IntDir>
+    <IncludePath>$(SolutionDir)dependencies\glfw\include\;$(SolutionDir)dependencies\timer\include\;$(SolutionDir)dependencies\INI\;$(SolutionDir)bootstrap;$(SolutionDir)dependencies/imgui;$(SolutionDir)dependencies/glm;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)dependencies\timer\src;$(SolutionDir)temp\bootstrap\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>timer_d.lib;bootstrap.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>timer.lib;bootstrap.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Behaviours\BFollowPath.cpp" />
+    <ClCompile Include="src\Behaviours\BKeyboardControlled.cpp" />
+    <ClCompile Include="src\Behaviours\BSeek.cpp" />
+    <ClCompile Include="src\Behaviours\BWander.cpp" />
+    <ClCompile Include="src\Blackboard\Blackboard.cpp" />
+    <ClCompile Include="src\Components\CBehaviourController.cpp" />
+    <ClCompile Include="src\Components\CKeyboardController.cpp" />
+    <ClCompile Include="src\Entities\GameObject.cpp" />
+    <ClCompile Include="src\Entities\player.cpp" />
+    <ClCompile Include="src\Game_AI_AaronApp.cpp" />
+    <ClCompile Include="src\GlobalConfig.cpp" />
+    <ClCompile Include="src\Graph\Graph2D.cpp" />
+    <ClCompile Include="src\Graph\Graph2DRenderer.cpp" />
+    <ClCompile Include="src\Graph\Path.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Pathfinding\Pathfinder.cpp" />
+    <ClCompile Include="src\ResourceManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\Behaviours\Behaviour.h" />
+    <ClInclude Include="inc\Behaviours\BFollowPath.h" />
+    <ClInclude Include="inc\Behaviours\BKeyboardControlled.h" />
+    <ClInclude Include="inc\Behaviours\BSeek.h" />
+    <ClInclude Include="inc\Behaviours\BWander.h" />
+    <ClInclude Include="inc\Blackboard\Blackboard.h" />
+    <ClInclude Include="inc\Components\CBehaviourController.h" />
+    <ClInclude Include="inc\Components\CKeyboardController.h" />
+    <ClInclude Include="inc\Components\JM_Component.h" />
+    <ClInclude Include="inc\Entities\GameObject.h" />
+    <ClInclude Include="inc\Entities\Player.h" />
+    <ClInclude Include="inc\Game_AI_AaronApp.h" />
+    <ClInclude Include="inc\GlobalConfig.h" />
+    <ClInclude Include="inc\Graph\Graph2D.h" />
+    <ClInclude Include="inc\Graph\Graph2DRenderer.h" />
+    <ClInclude Include="inc\Graph\Path.h" />
+    <ClInclude Include="inc\Pathfinding\Pathfinder.h" />
+    <ClInclude Include="inc\ResourceManager.h" />
+    <ClInclude Include="inc\Utilities\Colour.h" />
+    <ClInclude Include="inc\Utilities\jm_utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Graph\Graph.vcxproj">
+      <Project>{145705a4-0b4f-44c3-b546-d17d27c127fc}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
