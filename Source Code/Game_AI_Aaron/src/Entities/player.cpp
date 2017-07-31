@@ -59,9 +59,9 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 
 	m_wanderBehavour = std::shared_ptr<BWander>(new BWander());
 	m_wanderBehavour->setParent(this);
-	//m_wanderBehavour->setStrength(250);
-	m_wanderBehavour->setProjectionDistance(100);
-	m_wanderBehavour->setRadius(20);
+	m_wanderBehavour->setStrength(1);
+	m_wanderBehavour->setProjectionDistance(50);
+	m_wanderBehavour->setRadius(60);
 
 	setBehaviour(m_keyboardBehaviour);
 }
@@ -71,6 +71,7 @@ Player::~Player() {
 
 void Player::update(float deltaTime) {
 
+#pragma region ImGui
 	// Live debugging window
 	ImGui::Begin("Debugging");
 
@@ -86,12 +87,13 @@ void Player::update(float deltaTime) {
 
 		// Add a tree
 		const char* pathfindingAlgorithms[] = { "dijkstra", "astar" };
-		static int itemIndex = 0;
+		static int itemIndex = -1;
 		ImGui::Combo("Combo", &itemIndex, pathfindingAlgorithms, IM_ARRAYSIZE(pathfindingAlgorithms));
 		m_algorithm = pathfindingAlgorithms[itemIndex];
 	}
 	
 	ImGui::End();
+#pragma endregion
 
 	GameObject::update(deltaTime);
 

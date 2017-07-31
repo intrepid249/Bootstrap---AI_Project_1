@@ -46,6 +46,9 @@ public:
 	void setBehaviour(std::shared_ptr<Behaviour> behaviour);
 	Behaviour *getBehaviour();
 
+	void setRotation(float angle);
+	float getRotation();
+
 #pragma endregion
 
 	void wrapScreenBounds();
@@ -55,6 +58,7 @@ public:
 protected:
 	glm::vec2 m_pos, m_velocity, m_acceleration;
 	const float maxSpeed = 100;
+	float m_rotation;
 	float m_friction;
 	bool m_drawn;
 

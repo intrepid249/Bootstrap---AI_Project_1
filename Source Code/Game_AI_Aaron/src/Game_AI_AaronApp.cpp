@@ -66,9 +66,10 @@ void Game_AI_AaronApp::shutdown() {
 }
 
 void Game_AI_AaronApp::update(float deltaTime) {
+
 	INI<> *ini = GlobalConfig::getInstance();
 
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(23/255.f, 97/255.f, 203/255.f, 0.5));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(23/255.f, 97/255.f, 203/255.f, 0.75));
 	ImGui::Begin("Debugging", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
 	ImGui::SetWindowPos(ImVec2(0, 0));
@@ -81,6 +82,7 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	ImGui::Text("Hold LeftAlt to edit the graph");
 	ImGui::BulletText("Left Mouse Button: Add a node to the graph");
 	ImGui::Text("Hold LeftShift to use the path tools on the graph");
+	ImGui::Text("Note: Please select the pathfinding algorithm to use under the AI\nmenu before generating a path");
 	ImGui::BulletText("Left Mouse Button: Set the start node of the path");
 	ImGui::BulletText("Middle Mouse Button: Clear the path information");
 	ImGui::BulletText("Right Mouse Button: Set the end node of the path");
@@ -136,8 +138,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	updateGraph(deltaTime);
 
 	m_player->update(deltaTime);
-	m_player->constrainToScreenBounds(true);
-	//m_player->wrapScreenBounds();
+	//m_player->constrainToScreenBounds(true);
+	m_player->wrapScreenBounds();
 
 	// input example
 	aie::Input* input = aie::Input::getInstance();

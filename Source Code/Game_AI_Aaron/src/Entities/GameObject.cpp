@@ -1,7 +1,6 @@
 #include "Entities\GameObject.h"
 
 #include "GlobalConfig.h"
-#include "Utilities\jm_utilities.h"
 #include "Components\JM_Component.h"
 #include "Behaviours\Behaviour.h"
 
@@ -9,7 +8,7 @@
 #include <glm\glm.hpp>
 #include <Texture.h>
 
-GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_drawn(true) {
+GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true) {
 }
 
 GameObject::~GameObject() {
@@ -36,10 +35,10 @@ void GameObject::update(float deltaTime) {
 void GameObject::render(aie::Renderer2D * renderer) {
 	if (isDrawn()) {
 		glm::vec2 targetHeading = m_pos + m_velocity;
-		float rot = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
+		m_rotation = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
 
 		if (m_tex != nullptr)
-			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, 0, 0, rot);
+			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, 0, 0, m_rotation);
 		else
 			renderer->drawBox(m_pos.x, m_pos.y, 10, 10, 0.2f);
 
@@ -54,7 +53,7 @@ void GameObject::render(aie::Renderer2D * renderer) {
 
 		// Draw the lookat rotation - used to rotate sprites properly according to movement
 		renderer->setRenderColour(0xFF007FFF);
-		renderer->drawCircle(m_pos.x + cosf(rot) * 20, m_pos.y + sinf(rot) * 20, 2);
+		renderer->drawCircle(m_pos.x + cosf(m_rotation) * 20, m_pos.y + sinf(m_rotation) * 20, 2);
 		renderer->setRenderColour(0xFFFFFFFF);
 
 		for (size_t i = 0; i < m_components.size(); ++i)
@@ -113,6 +112,12 @@ void GameObject::setBehaviour(std::shared_ptr<Behaviour> behaviour) {
 }
 Behaviour * GameObject::getBehaviour() {
 	return m_behaviour.get();
+}
+void GameObject::setRotation(float angle) {
+	m_rotation = angle;
+}
+float GameObject::getRotation() {
+	return m_rotation;
 }
 #pragma endregion
 

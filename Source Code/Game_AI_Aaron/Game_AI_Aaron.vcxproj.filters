@@ -71,9 +71,6 @@
     <ClInclude Include="inc\Game_AI_AaronApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Utilities\jm_utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inc\Entities\GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>

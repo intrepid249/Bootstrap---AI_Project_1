@@ -36,7 +36,8 @@ public:
 protected:
 	float m_projectionDistance;
 	float m_radius;
-	float m_newDirDelay = 0.5f;
+	float m_newDirDelay = 0.3f;
+	const int ANGLE_CHANGE = 90;
 
 private:
 };
