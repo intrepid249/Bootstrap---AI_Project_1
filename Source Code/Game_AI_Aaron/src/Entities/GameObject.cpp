@@ -96,8 +96,8 @@ const float & GameObject::getFriction() {
 void GameObject::addComponent(std::shared_ptr<JM_Component> _component) {
 	m_components.push_back(std::move(_component));
 }
-void GameObject::setDraw(bool val) {
-	m_drawn = val;
+void GameObject::setDraw(bool flag) {
+	m_drawn = flag;
 }
 bool GameObject::isDrawn() {
 	return m_drawn;

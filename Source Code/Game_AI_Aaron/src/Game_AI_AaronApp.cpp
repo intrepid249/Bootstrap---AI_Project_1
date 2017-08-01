@@ -14,6 +14,8 @@
 #include "GlobalConfig.h"
 #include "Entities\GameObject.h"
 #include "Entities\Player.h"
+#include "Entities\HomeBase.h"
+
 #include "Graph\Graph2D.h"
 
 #include "ResourceManager.h"
@@ -48,11 +50,15 @@ bool Game_AI_AaronApp::startup() {
 	ResourceManager::create();
 	// Textures
 	ResourceManager::getTextures()["player"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/ship.png"));
+	ResourceManager::getTextures()["homeBase"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/Endless/homeBase.png"));
 	// Fonts
 	ResourceManager::getFonts()["default"] = std::shared_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 32));
 
 
 	/// Game Objects
+	// Base
+	m_baseList.push_back(std::shared_ptr<HomeBase>(new HomeBase(ResourceManager::getTextures()["homeBase"].get())));
+	// Player
 	m_player = std::unique_ptr<Player>(new Player(ResourceManager::getTextures()["player"].get()));
 	m_player->setPos(glm::vec2(getWindowWidth() * 0.5f, getWindowHeight() * 0.5f));
 	m_player->setGraph(m_graph.get());

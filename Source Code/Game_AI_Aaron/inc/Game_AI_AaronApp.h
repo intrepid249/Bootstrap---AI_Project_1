@@ -1,6 +1,7 @@
 #pragma once
 #include "Application.h"
 #include <memory>
+#include <vector>
 #include <Graph\Graph2D.h>
 #include <Graph\Graph2DRenderer.h>
 
@@ -12,6 +13,7 @@ namespace aie {
 	class Font;
 }
 class GameObject;
+class HomeBase;
 
 class Game_AI_AaronApp : public aie::Application {
 public:
@@ -34,7 +36,10 @@ public:
 protected:
 	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
-	std::unique_ptr<Player> m_player = nullptr;
+	std::unique_ptr<Player> m_player;
+
+	std::vector<std::shared_ptr<HomeBase>> m_baseList;
+	std::vector<std::shared_ptr<GameObject>> m_worldObjects;
 
 	std::unique_ptr<Graph2D> m_graph;
 	std::unique_ptr<Graph2DRenderer> m_graphRenderer;

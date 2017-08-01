@@ -99,6 +99,7 @@
     <ClCompile Include="src\Components\CBehaviourController.cpp" />
     <ClCompile Include="src\Components\CKeyboardController.cpp" />
     <ClCompile Include="src\Entities\GameObject.cpp" />
+    <ClCompile Include="src\Entities\HomeBase.cpp" />
     <ClCompile Include="src\Entities\player.cpp" />
     <ClCompile Include="src\Game_AI_AaronApp.cpp" />
     <ClCompile Include="src\GlobalConfig.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="inc\Components\CKeyboardController.h" />
     <ClInclude Include="inc\Components\JM_Component.h" />
     <ClInclude Include="inc\Entities\GameObject.h" />
+    <ClInclude Include="inc\Entities\HomeBase.h" />
     <ClInclude Include="inc\Entities\Player.h" />
     <ClInclude Include="inc\Game_AI_AaronApp.h" />
     <ClInclude Include="inc\GlobalConfig.h" />

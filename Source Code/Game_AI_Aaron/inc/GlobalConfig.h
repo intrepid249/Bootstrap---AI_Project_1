@@ -3,6 +3,8 @@
 
 #define IM_ARRAYSIZE(_ARR) ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
+#define PLAYER_MOVEMENT_SPEED 200
+
 typedef INI<> ini_t;
 
 class GlobalConfig {

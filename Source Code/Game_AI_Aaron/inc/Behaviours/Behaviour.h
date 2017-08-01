@@ -31,5 +31,6 @@ public:
 
 protected:
 	GameObject *m_parentObject = nullptr;
+	
 	float m_strength = 0;
 };

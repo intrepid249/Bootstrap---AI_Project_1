@@ -1,9 +1,11 @@
 #pragma once
 #include "Behaviour.h"
+#include <memory>
 
 namespace aie {
 	class Renderer2D;
 }
+class BSeek;
 
 class BWander : public Behaviour {
 public:
@@ -38,6 +40,8 @@ protected:
 	float m_radius;
 	float m_newDirDelay = 0.3f;
 	const int ANGLE_CHANGE = 90;
+
+	std::shared_ptr<BSeek> m_seeker;
 
 private:
 };

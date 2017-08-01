@@ -1,5 +1,8 @@
 #include "Behaviours\BWander.h"
+#include "Behaviours\BSeek.h"
 #include "Entities\GameObject.h"
+
+#include "GlobalConfig.h"
 
 #include <jm_utilities.h>
 
@@ -8,6 +11,8 @@
 #include <Renderer2D.h>
 
 BWander::BWander() {
+	m_seeker = std::shared_ptr<BSeek>(new BSeek());
+	m_seeker->setStrength(PLAYER_MOVEMENT_SPEED);
 }
 
 BWander::~BWander() {
@@ -18,11 +23,13 @@ void BWander::entryActions() {
 
 void BWander::doActions(float deltaTime) {
 	if (m_parentObject != nullptr) {
-		//static float directionTimer = m_newDirDelay;
+		m_seeker->setParent(m_parentObject);
+
+		static float directionTimer = m_newDirDelay;
 		static float randomAngle;
 
-		//directionTimer += deltaTime;
-		//if (directionTimer < m_newDirDelay) return;
+		directionTimer += deltaTime;
+		if (directionTimer < m_newDirDelay) return;
 
 		// Get the direction of travel and project a distance in front of the object
 		glm::vec2 projectionVector;
@@ -34,16 +41,15 @@ void BWander::doActions(float deltaTime) {
 
 		// Use the radius and the projectedVector in order to construct a circle and use polar coordinates
 		// to determine a new heading
-		randomAngle += (float)(rand() * ANGLE_CHANGE - (ANGLE_CHANGE * 0.5f)); // get a bearing
+		randomAngle = (float)(rand() * 360); // get a bearing
 		// Convert polar coordinate system to the cartesian plane for use
 		glm::vec2 newTarget = glm::vec2(cosf(randomAngle) * m_radius, sinf(randomAngle) * m_radius) + projectionVector;
 
-		// Calculate a new velocity
-		glm::vec2 desired_velocity = (newTarget)* m_strength;
-
 		// Apply a force towards the new position
-		m_parentObject->applyForce(desired_velocity);
-		//directionTimer = 0;
+		m_seeker->setTarget(newTarget);
+		m_seeker->doActions(deltaTime);
+
+		directionTimer = 0;
 	}
 }
 

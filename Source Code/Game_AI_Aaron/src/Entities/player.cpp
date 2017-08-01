@@ -19,17 +19,16 @@
 
 #include <iostream>
 
-
 Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_endNode(nullptr) {
 	setFriction(1);
 
 	m_keyboardBehaviour = std::shared_ptr<BKeyboardControlled>(new BKeyboardControlled());
 	m_keyboardBehaviour->setParent(this);
-	m_keyboardBehaviour->setStrength(200);
+	m_keyboardBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 
 	m_seekBehaviour = std::shared_ptr<BSeek>(new BSeek());
 	m_seekBehaviour->setParent(this);
-	m_seekBehaviour->setStrength(150);
+	m_seekBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 	m_seekBehaviour->setInnerRadius(20);
 	m_seekBehaviour->setOuterRadius(200);
 	m_seekBehaviour->onInnerRadiusEnter([this]() {
@@ -38,7 +37,7 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 
 	m_fleeBehaviour = std::shared_ptr<BSeek>(new BSeek());
 	m_fleeBehaviour->setParent(this);
-	m_fleeBehaviour->setStrength(-150);
+	m_fleeBehaviour->setStrength(-PLAYER_MOVEMENT_SPEED);
 	m_fleeBehaviour->setOuterRadius(200);
 	m_fleeBehaviour->onOuterRadiusExit([this]() {
 		setBehaviour(m_keyboardBehaviour);
@@ -48,7 +47,7 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 	m_followPathBehaviour = std::shared_ptr<BFollowPath>(new BFollowPath());
 	m_followPathBehaviour->setParent(this);
 	m_followPathBehaviour->setPath(m_path.get());
-	m_followPathBehaviour->setStrength(80);
+	m_followPathBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 	m_followPathBehaviour->setNodeRadius(20);
 	m_followPathBehaviour->onLastNodeReached([this]() {
 		if (m_followPathBehaviour->isPatrolling())
@@ -61,7 +60,7 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 	m_wanderBehavour->setParent(this);
 	m_wanderBehavour->setStrength(1);
 	m_wanderBehavour->setProjectionDistance(50);
-	m_wanderBehavour->setRadius(60);
+	m_wanderBehavour->setRadius(100);
 
 	setBehaviour(m_keyboardBehaviour);
 }
@@ -83,6 +82,8 @@ void Player::update(float deltaTime) {
 		static bool wanderFlag = false;
 		if (ImGui::Checkbox("Wander", &wanderFlag))
 			setBehaviour(m_wanderBehavour);
+		if (!wanderFlag)
+			setBehaviour(m_keyboardBehaviour);
 
 
 		// Add a tree
