@@ -100,18 +100,22 @@ bool Game_AI_AaronApp::startup() {
 			// Iterate through the gid list and store tile information
 			auto currentLayer = m_tileGid_Layers[layerIndex];
 			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData[0].size(); tileIndex++) {
+				int tempGid = std::stoi(currentLayer.layerData[0][tileIndex]);
+				(tempGid <= m_tilesets[currentTilesetIndex].firstGID) ? 0 : 0;
+
 				jm::Tile t;
-				t.gid = std::stoi(currentLayer.layerData[0][tileIndex]) - 1;
+				t.gid = tempGid - 1;
 				t.image = ResourceManager::getTextures()[m_tilesetImageNames[currentTilesetIndex].c_str()].get();
 				t.width = (float)m_tilesets[currentTilesetIndex].tileWidth;
 				t.height = (float)m_tilesets[currentTilesetIndex].tileHeight;
-				t.uv_y = (t.gid == 0) ? 0 : ((t.gid % m_tilesets[0].columns) == 0) ? (t.gid / m_tilesets[0].columns) : (int)ceil(t.gid / (double)m_tilesets[0].columns) - 1; // Problem is here when "-1"ing ->result 3 instead of 4
+				// Calculate uv coordinates needed for accessing the individual tile image
+				t.uv_y = (t.gid == 0) ? 0 : ((t.gid % m_tilesets[0].columns) == 0) ? (t.gid / m_tilesets[0].columns) : (int)ceil(t.gid / (double)m_tilesets[0].columns) - 1;
 				t.uv_x = t.gid - (m_tilesets[0].columns * t.uv_y);
 				std::transform(currentLayer.name.begin(), currentLayer.name.end(), currentLayer.name.begin(), ::tolower);
 				if (currentLayer.name == "background")
 					t.layerDepth = 20;
 				else
-					t.layerDepth = -1;
+					t.layerDepth = -5;
 				
 				m_backgroundTiles.push_back(t);
 			}
@@ -170,6 +174,10 @@ bool Game_AI_AaronApp::startup() {
 	appIcon[0].height = appImg->getHeight();
 	appIcon[0].pixels = const_cast<unsigned char*>(appImg->getPixels());
 	glfwSetWindowIcon(getWindowPtr(), 1, appIcon);
+
+
+	// Set to false for standard gameplay
+	allowFreeCameraMovement = true;
 
 	return true;
 }
@@ -267,6 +275,22 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	input->getMouseXY(&mx, &my);
 	m_mousePos = glm::vec2(mx, my);
 
+	// Move camera around freely for testing
+	if (allowFreeCameraMovement) {
+		static const float cameraSpeed = 300.f;
+		if (input->isKeyDown(aie::INPUT_KEY_DOWN))
+			m_cameraPos.y -= cameraSpeed * deltaTime;
+		if (input->isKeyDown(aie::INPUT_KEY_UP))
+			m_cameraPos.y += cameraSpeed * deltaTime;
+		if (input->isKeyDown(aie::INPUT_KEY_LEFT))
+			m_cameraPos.x -= cameraSpeed * deltaTime;
+		if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
+			m_cameraPos.x += cameraSpeed * deltaTime;
+
+		// Correct mouse position for new camera location
+		m_mousePos += m_cameraPos;
+	}
+
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
@@ -316,7 +340,7 @@ void Game_AI_AaronApp::draw() {
 	}
 #pragma endregion
 
-	//m_renderer->setCameraPos(m_player->getPos().x, m_player->getPos().y);
+	m_renderer->setCameraPos(m_cameraPos.x, m_cameraPos.y);
 
 	// done drawing sprites
 	m_renderer->end();

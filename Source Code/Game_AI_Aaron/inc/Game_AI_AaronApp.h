@@ -41,6 +41,9 @@ public:
 protected:
 	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
+	bool allowFreeCameraMovement;
+	glm::vec2 m_cameraPos;
+
 	/// Map information
 	pugi::xml_document m_mapData;
 	std::vector<jm::Tileset> m_tilesets;								// Information about each tileset
