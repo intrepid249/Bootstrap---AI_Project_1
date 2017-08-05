@@ -5,6 +5,9 @@
 #include <Graph\Graph2D.h>
 #include <Graph\Graph2DRenderer.h>
 
+#include "XML\pugixml.hpp"
+#include "Tileset.h"
+
 #include "Entities\Player.h"
 
 
@@ -33,14 +36,26 @@ public:
 	void generateGraphEdges();
 	void updateGraph(float deltaTime);
 
+	void generateTilesetData();
+
 protected:
 	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
+	/// Map information
+	pugi::xml_document m_mapData;
+	std::vector<jm::Tileset> m_tilesets;								// Information about each tileset
+	std::vector<std::string> m_tilesetImageNames;						// Store names of the tilesets for subscript accessing texture map
+	unsigned int m_mapWidth, m_mapHeight, m_tileWidth, m_tileHeight;
+	std::vector<jm::TileLayer> m_tileGid_Layers;						// Stores the gid information about each tile in an array
+	std::vector<jm::Tile> m_backgroundTiles;							// Data about each tile in the map
+
+	/// Game objects
 	std::unique_ptr<Player> m_player;
 
 	std::vector<std::shared_ptr<HomeBase>> m_baseList;
 	std::vector<std::shared_ptr<GameObject>> m_worldObjects;
 
+	/// Graph information
 	std::unique_ptr<Graph2D> m_graph;
 	std::unique_ptr<Graph2DRenderer> m_graphRenderer;
 

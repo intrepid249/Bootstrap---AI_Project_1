@@ -41,7 +41,7 @@ int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	// Seed the random function
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 
 	// Activate the signals to handle memory when the program encounters an error
 	signal(SIGINT, cleanMemory); /// Detection of interactive attention signal
@@ -57,7 +57,6 @@ int main() {
 	glfwInit();
 	// disable the window resizing
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
 	//==========================================================
 
 

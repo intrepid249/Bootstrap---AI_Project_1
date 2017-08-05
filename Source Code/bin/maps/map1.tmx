@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" tiledversion="1.0.2" orientation="orthogonal" renderorder="right-down" width="3" height="3" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" source="grass.tsx"/>
+ <layer name="Background" width="3" height="3">
+  <data encoding="csv">
+65,1,11,
+49,12,23,
+8,17,42
+</data>
+ </layer>
+</map>

@@ -22,7 +22,7 @@ public:
 	/** Perform logic to update values each frame*/
 	virtual void update(float dt);
 	/** Perform logic to display GameObject to the screen*/
-	virtual void render(aie::Renderer2D *renderer);
+	virtual void render(aie::Renderer2D *renderer, float depth = 0);
 
 	/** Apply a newtonian force to the velocity of the object*/
 	void applyForce(const glm::vec2& _force);
@@ -32,6 +32,13 @@ public:
 	void setPos(const glm::vec2& _pos);
 	/** Gets the position of the object within the world space*/
 	const glm::vec2 &getPos();
+
+	/** Scale the size of the image by specified amount*/
+	void scale(const float _scale);
+	/** Scale the size of the image by specified amount*/
+	void scale(const glm::vec2& _scale);
+	/** Get the amount of scaling applied*/
+	const glm::vec2 &getScale();
 
 	/** Set the current travel velocity of the object*/
 	void setVelocity(const glm::vec2& _velocity);
@@ -74,7 +81,7 @@ public:
 	void destroyOnExitScreen();
 
 protected:
-	glm::vec2 m_pos, m_velocity, m_acceleration;
+	glm::vec2 m_pos, m_velocity, m_acceleration, m_scaleAmount;
 	const float maxSpeed = 100;
 	float m_rotation;
 	float m_friction;

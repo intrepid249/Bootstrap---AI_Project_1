@@ -36,8 +36,9 @@ public:
 	float getRadius() const;
 
 protected:
+	glm::vec2 m_circleCentre;
 	float m_projectionDistance;
-	float m_radius;
+	float m_radius, m_newRotation;
 	float m_newDirDelay = 0.3f;
 	const int ANGLE_CHANGE = 90;
 

@@ -8,7 +8,7 @@
 #include <glm\glm.hpp>
 #include <Texture.h>
 
-GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true) {
+GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)) {
 }
 
 GameObject::~GameObject() {
@@ -32,13 +32,14 @@ void GameObject::update(float deltaTime) {
 	}
 }
 
-void GameObject::render(aie::Renderer2D * renderer) {
+void GameObject::render(aie::Renderer2D * renderer, float depth) {
 	if (isDrawn()) {
 		glm::vec2 targetHeading = m_pos + m_velocity;
 		m_rotation = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
 
 		if (m_tex != nullptr)
-			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, 0, 0, m_rotation);
+			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, m_tex->getWidth() * m_scaleAmount.x, m_tex->getHeight() * m_scaleAmount.y, 
+				m_rotation, depth);
 		else
 			renderer->drawBox(m_pos.x, m_pos.y, 10, 10, 0.2f);
 
@@ -76,6 +77,18 @@ void GameObject::setPos(const glm::vec2& _pos) {
 
 const glm::vec2 & GameObject::getPos() {
 	return m_pos;
+}
+
+void GameObject::scale(const float _scale) {
+	m_scaleAmount = glm::vec2(_scale, _scale);
+}
+
+void GameObject::scale(const glm::vec2 & _scale) {
+	m_scaleAmount = _scale;
+}
+
+const glm::vec2 & GameObject::getScale() {
+	return m_scaleAmount;
 }
 
 void GameObject::setVelocity(const glm::vec2& _velocity) {

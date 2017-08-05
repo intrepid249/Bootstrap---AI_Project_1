@@ -1,6 +1,6 @@
 #include "Entities\HomeBase.h"
 
-HomeBase::HomeBase(aie::Texture * tex) {
+HomeBase::HomeBase(aie::Texture * tex) : GameObject(tex) {
 }
 
 HomeBase::~HomeBase() {

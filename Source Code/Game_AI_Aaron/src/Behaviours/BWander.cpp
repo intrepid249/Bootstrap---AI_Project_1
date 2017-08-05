@@ -10,7 +10,7 @@
 #include <random>
 #include <Renderer2D.h>
 
-BWander::BWander() {
+BWander::BWander() : m_newRotation(0), m_projectionDistance(10), m_radius(20) {
 	m_seeker = std::shared_ptr<BSeek>(new BSeek());
 	m_seeker->setStrength(PLAYER_MOVEMENT_SPEED);
 }
@@ -25,31 +25,18 @@ void BWander::doActions(float deltaTime) {
 	if (m_parentObject != nullptr) {
 		m_seeker->setParent(m_parentObject);
 
-		static float directionTimer = m_newDirDelay;
-		static float randomAngle;
-
-		directionTimer += deltaTime;
-		if (directionTimer < m_newDirDelay) return;
-
 		// Get the direction of travel and project a distance in front of the object
-		glm::vec2 projectionVector;
-
-		if (glm::length(m_parentObject->getVelocity()) == 0)
-			projectionVector = glm::normalize(glm::vec2(cosf(m_parentObject->getRotation()), sinf(m_parentObject->getRotation()))) * m_projectionDistance;
-		else
-			projectionVector = glm::normalize(m_parentObject->getVelocity()) * m_projectionDistance;
+		m_circleCentre = glm::normalize(glm::vec2(cosf(m_parentObject->getRotation()), sinf(m_parentObject->getRotation()))) * m_projectionDistance;
 
 		// Use the radius and the projectedVector in order to construct a circle and use polar coordinates
 		// to determine a new heading
-		randomAngle = (float)(rand() * 360); // get a bearing
+		float prevAngle = m_newRotation;
+		m_newRotation = prevAngle + (float)((rand() % 314) - 158) / 100.f;
 		// Convert polar coordinate system to the cartesian plane for use
-		glm::vec2 newTarget = glm::vec2(cosf(randomAngle) * m_radius, sinf(randomAngle) * m_radius) + projectionVector;
+		glm::vec2 targetForce = glm::vec2(cosf(m_newRotation) * m_radius, sinf(m_newRotation) * m_radius) + m_circleCentre;
 
 		// Apply a force towards the new position
-		m_seeker->setTarget(newTarget);
-		m_seeker->doActions(deltaTime);
-
-		directionTimer = 0;
+		m_parentObject->applyForce(targetForce);
 	}
 }
 

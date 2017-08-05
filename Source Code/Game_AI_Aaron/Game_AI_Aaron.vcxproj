@@ -63,7 +63,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc\XML\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -80,7 +80,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graph\inc\;$(ProjectDir)inc\XML\;$(ProjectDir)inc;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,6 +109,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Pathfinding\Pathfinder.cpp" />
     <ClCompile Include="src\ResourceManager.cpp" />
+    <ClCompile Include="src\XML\pugixml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Behaviours\Behaviour.h" />
@@ -130,7 +131,10 @@
     <ClInclude Include="inc\Graph\Path.h" />
     <ClInclude Include="inc\Pathfinding\Pathfinder.h" />
     <ClInclude Include="inc\ResourceManager.h" />
+    <ClInclude Include="inc\Tileset.h" />
     <ClInclude Include="inc\Utilities\Colour.h" />
+    <ClInclude Include="inc\XML\pugiconfig.hpp" />
+    <ClInclude Include="inc\XML\pugixml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Graph\Graph.vcxproj">
