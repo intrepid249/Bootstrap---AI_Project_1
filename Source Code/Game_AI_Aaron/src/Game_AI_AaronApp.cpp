@@ -343,8 +343,6 @@ void Game_AI_AaronApp::draw() {
 	for (auto base : m_baseList)
 		base->render(m_renderer.get());
 
-	//aie::Texture *bgImage = ResourceManager::getTextures()[m_tilesetImageNames[0].c_str()].get();
-	//m_renderer->drawSprite(bgImage, 100, 100, 0, 0, 0, -1);
 #pragma region Tileset
 	pugi::xml_node map = m_mapData.child("map");
 	for (auto layerIter = map.children("layer").begin(); layerIter != map.children("layer").end(); layerIter++) {
@@ -358,7 +356,7 @@ void Game_AI_AaronApp::draw() {
 				// Modify the UV region of the sprite to display the selected tile within the image
 				m_renderer->setUVRect(ux, uy, t.width / m_tilesets[0].imageWidth, t.height / m_tilesets[0].imageHeight);
 
-				m_renderer->drawSprite(t.image, x * t.width, (m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, t.layerDepth);
+				m_renderer->drawSprite(t.image, x * t.width, (m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, t.layerDepth, 0, 1);
 
 				m_renderer->setUVRect(0, 0, 1, 1);
 			}
