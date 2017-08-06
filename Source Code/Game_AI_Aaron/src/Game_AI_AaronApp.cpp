@@ -101,6 +101,7 @@ bool Game_AI_AaronApp::startup() {
 			// Store the tile gid data
 			jm::TileLayer tl((*iter).attribute("name").value(), (*iter).attribute("width").as_int(), (*iter).attribute("height").as_int());
 			tl.layerData = gidData;
+
 			m_tileGid_Layers.push_back(tl);
 		}
 
@@ -111,8 +112,11 @@ bool Game_AI_AaronApp::startup() {
 			// Iterate through the gid list and store tile information
 			auto currentLayer = m_tileGid_Layers[layerIndex];
 			std::string layerName = (*iter).attribute("name").as_string();
+
 			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData.size(); tileIndex++) {
-				int tempGid = std::stoi(currentLayer.layerData[tileIndex]);
+				std::cout << currentLayer.layerData[tileIndex] << ", ";
+				int tempGid = std::stoi(currentLayer.layerData[tileIndex]); // For some reason all the layer data for "top" layer is 0
+
 				// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
 				if (tempGid > m_tilesets[currentTilesetIndex].tileCount) {
 					tempGid -= (currentTilesetIndex == 0) ? m_tilesets[currentTilesetIndex].tileCount : m_tilesets[currentTilesetIndex - 1].tileCount;
