@@ -36,14 +36,14 @@ Game_AI_AaronApp::~Game_AI_AaronApp() {
 }
 
 bool Game_AI_AaronApp::startup() {
-	
+
 	m_renderer = std::shared_ptr<aie::Renderer2D>(new aie::Renderer2D());
 
 	/// Configuration
 	INI<> *ini = GlobalConfig::getInstance();
 
 	/// Map Information
-	pugi::xml_parse_result result	= m_mapData.load_file("./maps/map1.tmx");
+	pugi::xml_parse_result result = m_mapData.load_file("./maps/map1.tmx");
 	if (result) {
 		// Store the map attributes as member variables
 		pugi::xml_node map = m_mapData.child("map");
@@ -80,45 +80,74 @@ bool Game_AI_AaronApp::startup() {
 			tilesetCount++;
 		}
 
-		
+		auto objectList = map.child("objectgroup");
+		for (auto iter = objectList.children("object").begin(); iter != objectList.children("object").end(); iter++) {
+			float cx = (*iter).attribute("x").as_float();
+			float cy = (*iter).attribute("y").as_float();
+			float width = (*iter).attribute("width").as_float();
+			float height = (*iter).attribute("height").as_float();
+			jm::Object collider(cx, cy, width, height);
+			m_collisionTiles.push_back(collider);
+		}
+
+
 		// Iterate through each tile layer to store gid information
 		for (auto iter = map.children("layer").begin(); iter != map.children("layer").end(); iter++) {
 			// GID data is stored in CSV format
 			std::string rawText = (*iter).child("data").text().as_string();
-			std::cout << (*iter).attribute("name").value() << rawText << "\n";
 			std::vector<std::string> gidData;
 			jm::stringSplit(rawText, ',', gidData);
+
 			// Store the tile gid data
 			jm::TileLayer tl((*iter).attribute("name").value(), (*iter).attribute("width").as_int(), (*iter).attribute("height").as_int());
-			tl.layerData.push_back(gidData);
+			tl.layerData = gidData;
 			m_tileGid_Layers.push_back(tl);
 		}
 
 		// Iterate through each tile layer to store tile information
 		int currentTilesetIndex = 0;
-		for (size_t layerIndex = 0; layerIndex < m_tileGid_Layers.size(); layerIndex++) {
+		size_t layerIndex = 0;
+		for (auto iter = map.children("layer").begin(); iter != map.children("layer").end(); iter++) {
 			// Iterate through the gid list and store tile information
 			auto currentLayer = m_tileGid_Layers[layerIndex];
-			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData[0].size(); tileIndex++) {
-				int tempGid = std::stoi(currentLayer.layerData[0][tileIndex]);
-				(tempGid <= m_tilesets[currentTilesetIndex].firstGID) ? 0 : 0;
+			std::string layerName = (*iter).attribute("name").as_string();
+			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData.size(); tileIndex++) {
+				int tempGid = std::stoi(currentLayer.layerData[tileIndex]);
+				// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
+				if (tempGid > m_tilesets[currentTilesetIndex].tileCount) {
+					tempGid -= (currentTilesetIndex == 0) ? m_tilesets[currentTilesetIndex].tileCount : m_tilesets[currentTilesetIndex - 1].tileCount;
+					if (currentTilesetIndex + 1 < m_tilesets.size())
+						currentTilesetIndex++;
+				}
+				else if (tempGid != 0 && tempGid < m_tilesets[currentTilesetIndex].firstGID)
+					currentTilesetIndex--;
 
 				jm::Tile t;
 				t.gid = tempGid - 1;
-				t.image = ResourceManager::getTextures()[m_tilesetImageNames[currentTilesetIndex].c_str()].get();
+				if (tempGid != 0)
+					t.image = ResourceManager::getTextures()[m_tilesetImageNames[currentTilesetIndex].c_str()].get();
+				else
+					t.image = nullptr;
+
 				t.width = (float)m_tilesets[currentTilesetIndex].tileWidth;
 				t.height = (float)m_tilesets[currentTilesetIndex].tileHeight;
 				// Calculate uv coordinates needed for accessing the individual tile image
-				t.uv_y = (t.gid == 0) ? 0 : ((t.gid % m_tilesets[0].columns) == 0) ? (t.gid / m_tilesets[0].columns) : (int)ceil(t.gid / (double)m_tilesets[0].columns) - 1;
-				t.uv_x = t.gid - (m_tilesets[0].columns * t.uv_y);
+				t.uv_y = (t.gid == 0) ? 0 : ((t.gid % m_tilesets[currentTilesetIndex].columns) == 0) ? (t.gid / m_tilesets[currentTilesetIndex].columns)
+					: (int)ceil(t.gid / (double)m_tilesets[currentTilesetIndex].columns) - 1;
+				t.uv_x = t.gid - (m_tilesets[currentTilesetIndex].columns * t.uv_y);
+
+				// Set the rendering depth according to the tileset layer
 				std::transform(currentLayer.name.begin(), currentLayer.name.end(), currentLayer.name.begin(), ::tolower);
 				if (currentLayer.name == "background")
 					t.layerDepth = 20;
+				else if (currentLayer.name == "foreground")
+					t.layerDepth = -1;
 				else
 					t.layerDepth = -5;
-				
-				m_backgroundTiles.push_back(t);
+
+				m_backgroundTiles[layerName].push_back(t);
 			}
+			layerIndex++;
 		}
 	} else {
 #if 0
@@ -166,7 +195,7 @@ bool Game_AI_AaronApp::startup() {
 	m_player->scale(0.2f);
 	m_player->setGraph(m_graph.get());
 
-	
+
 	// Change the window icon
 	GLFWimage appIcon[1];
 	aie::Texture *appImg = ResourceManager::getTextures()["appIcon"].get();
@@ -191,7 +220,7 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	INI<> *ini = GlobalConfig::getInstance();
 
 #pragma region ImGui
-	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(23/255.f, 97/255.f, 203/255.f, 0.75));
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(23 / 255.f, 97 / 255.f, 203 / 255.f, 0.75));
 	ImGui::Begin("Debugging", (bool*)0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
 	ImGui::SetWindowPos(ImVec2(0, 0));
@@ -219,7 +248,7 @@ void Game_AI_AaronApp::update(float deltaTime) {
 
 		ImGui::SliderInt("Rows", &rows, 2, (int)((windowSize.y) / spacing));
 		ImGui::SliderInt("Cols", &cols, 2, (int)((windowSize.x - xOffset) / spacing));
-		
+
 		ImGui::Separator();
 
 		if (ImGui::Button("Update Graph")) {
@@ -313,30 +342,38 @@ void Game_AI_AaronApp::draw() {
 	//aie::Texture *bgImage = ResourceManager::getTextures()[m_tilesetImageNames[0].c_str()].get();
 	//m_renderer->drawSprite(bgImage, 100, 100, 0, 0, 0, -1);
 #pragma region Tileset
-	float x = 0, y = 0;
-	for (auto iter = m_backgroundTiles.begin(); iter != m_backgroundTiles.end(); iter++) {
-		jm::Tile t = (*iter);
-		float ux = (float)(t.uv_x) * (t.width / (float)t.image->getWidth());
-		float uy = (float)(t.uv_y) * (t.height / (float)t.image->getHeight());
-		//m_renderer->setUVRect(
-		//	(float)(t.uv_x % m_tilesets[0].columns) * (t.width / (float)t.image->getWidth()),
-		//	(float)(t.uv_y / m_tilesets[0].columns) * (t.height / (float)t.image->getHeight()),
-		//	t.width / t.image->getWidth(), t.height / t.image->getHeight());
+	pugi::xml_node map = m_mapData.child("map");
+	for (auto layerIter = map.children("layer").begin(); layerIter != map.children("layer").end(); layerIter++) {
+		std::string layerName = (*layerIter).attribute("name").as_string();
+		float x = 0, y = 0;
+		for (auto iter = m_backgroundTiles[layerName].begin(); iter != m_backgroundTiles[layerName].end(); iter++) {
+			jm::Tile t = (*iter);
+			if (t.image != nullptr) {
+				float ux = (float)(t.uv_x) * (t.width / (float)t.image->getWidth());
+				float uy = (float)(t.uv_y) * (t.height / (float)t.image->getHeight());
+				// Modify the UV region of the sprite to display the selected tile within the image
+				m_renderer->setUVRect(ux, uy, t.width / m_tilesets[0].imageWidth, t.height / m_tilesets[0].imageHeight);
 
-		float px = t.uv_x;
-		float py = t.uv_y;
-		m_renderer->setUVRect(ux, uy, t.width / m_tilesets[0].imageWidth, t.height / m_tilesets[0].imageHeight);
+				m_renderer->drawSprite(t.image, x * t.width, (m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, t.layerDepth);
 
-		m_renderer->drawSprite(t.image, 100 + x * t.width, getWindowHeight() - 300 - (y * t.height), t.width, t.height, 0, t.layerDepth);
-		m_renderer->setUVRect(0, 0, 1, 1);
+				m_renderer->setUVRect(0, 0, 1, 1);
+			}
 
-		if (x < m_tileGid_Layers[0].width - 1) {
-			x++;
-			continue;
-		} else
-			x = 0;
+			if (x < m_tileGid_Layers[0].width - 1) {
+				x++;
+				continue;
+			} else
+				x = 0;
 
-		y++;
+			y++;
+		}
+	}
+
+	for (auto iter = m_collisionTiles.begin(); iter != m_collisionTiles.end(); iter++) {
+		m_renderer->setRenderColour(1, 0, 0, 0.3);
+		jm::Object obj = (*iter);
+		m_renderer->drawBox(obj.x + obj.width / 2, (m_mapHeight * m_tileHeight) - (obj.y + obj.height / 2), obj.width, obj.height);
+		m_renderer->setRenderColour(1, 1, 1, 1);
 	}
 #pragma endregion
 
@@ -443,5 +480,5 @@ void Game_AI_AaronApp::updateGraph(float deltaTime) {
 }
 
 void Game_AI_AaronApp::generateTilesetData() {
-	
+
 }

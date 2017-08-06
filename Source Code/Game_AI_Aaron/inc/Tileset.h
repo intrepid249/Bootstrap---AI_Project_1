@@ -40,7 +40,7 @@ namespace jm {
 		std::string name;
 		unsigned int width;
 		unsigned int height;
-		std::vector<std::vector<std::string>> layerData;
+		std::vector<std::string> layerData;
 	};
 
 	struct Tile {
@@ -51,5 +51,19 @@ namespace jm {
 		float height;
 		int uv_x;
 		int uv_y;
+	};
+
+	struct Object {
+		Object(float _x, float _y, float _width, float _height) {
+			x = _x;
+			y = _y;
+			width = _width;
+			height = _height;
+		}
+
+		float x;
+		float y;
+		float width;
+		float height;
 	};
 }
