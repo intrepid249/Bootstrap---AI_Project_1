@@ -43,6 +43,7 @@ bool Game_AI_AaronApp::startup() {
 	INI<> *ini = GlobalConfig::getInstance();
 
 	/// Map Information
+#pragma region Tiled Map Data
 	pugi::xml_parse_result result = m_mapData.load_file("./maps/map1.tmx");
 	if (result) {
 		// Store the map attributes as member variables
@@ -163,9 +164,13 @@ bool Game_AI_AaronApp::startup() {
 
 		std::cout << "Problem reading map information:\n" << result.description() << "\n";
 	}
+#pragma endregion
 
 	/// Graph
 	// Read configuration settings
+	ini->select("Player");
+	m_cameraSafeBounds = glm::vec2(ini->get("CameraXPadding", int()), ini->get("CameraYPadding", int()));
+
 	ini->select("WorldOptions");
 	m_graphSpacing = ini->get("GraphSpacing", int());
 	// Generate the graph
@@ -241,12 +246,18 @@ void Game_AI_AaronApp::update(float deltaTime) {
 		ImGui::Separator();
 
 		if (ImGui::Button("Update Camera Padding")) {
-
+			m_cameraSafeBounds = glm::vec2(horizontalPadding, verticalPadding);
 		}
 		ImGui::SameLine(180);
 
 		if (ImGui::Button("Save Camera Padding")) {
+			if (ini->select("Player"));
+			else ini->create("Player");
 
+			m_cameraSafeBounds = glm::vec2(horizontalPadding, verticalPadding);
+			ini->set("CameraXPadding", m_cameraSafeBounds.x);
+			ini->set("CameraYPadding", m_cameraSafeBounds.y);
+			ini->save();
 		}
 	}
 
@@ -314,7 +325,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	updateGraph(deltaTime);
 
 	m_player->update(deltaTime);
-	//m_player->constrainToScreenBounds(true);
+	m_player->checkCollisions(m_collisionTiles);
+	m_player->constrainToScreenBounds(false);
 	//m_player->wrapScreenBounds();
 
 	for (auto base : m_baseList)
@@ -328,21 +340,56 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	input->getMouseXY(&mx, &my);
 	m_mousePos = glm::vec2(mx, my);
 
+#pragma region Camera Movement
+	static bool camUp = false, camDown = false, camLeft = false, camRight = false;
+
 	// Move camera around freely for testing
 	if (allowFreeCameraMovement) {
-		static const float cameraSpeed = 300.f;
 		if (input->isKeyDown(aie::INPUT_KEY_DOWN))
-			m_cameraPos.y -= cameraSpeed * deltaTime;
+			camDown = true;
 		if (input->isKeyDown(aie::INPUT_KEY_UP))
-			m_cameraPos.y += cameraSpeed * deltaTime;
+			camUp = true;
 		if (input->isKeyDown(aie::INPUT_KEY_LEFT))
-			m_cameraPos.x -= cameraSpeed * deltaTime;
+			camLeft = true;
 		if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
-			m_cameraPos.x += cameraSpeed * deltaTime;
+			camRight = true;
 
-		// Correct mouse position for new camera location
-		m_mousePos += m_cameraPos;
+
+		if (input->isKeyUp(aie::INPUT_KEY_DOWN))
+			camDown = false;
+		if (input->isKeyUp(aie::INPUT_KEY_UP))
+			camUp = false;
+		if (input->isKeyUp(aie::INPUT_KEY_LEFT))
+			camLeft = false;
+		if (input->isKeyUp(aie::INPUT_KEY_RIGHT))
+			camRight = false;
 	}
+
+
+	// Move the camera if the player moves within the camera  "safe" region
+	static const float cameraSpeed = 300.f;
+	glm::vec2 s = m_player->getSize();
+	if (camDown || (m_player->getPos().y - m_player->getSize().y / 2 < m_cameraPos.y + m_cameraSafeBounds.y))
+		if (m_cameraPos.y > (0 + m_tileHeight / 2)) {
+			m_cameraPos.y -= cameraSpeed * deltaTime;
+		}
+	if (camUp || (m_player->getPos().y + m_player->getSize().y / 2) > (m_cameraPos.y + getWindowHeight()) - m_cameraSafeBounds.y)
+		if (m_cameraPos.y + (getWindowHeight() + m_tileHeight / 2) < (m_mapHeight * m_tileHeight)) {
+			m_cameraPos.y += cameraSpeed * deltaTime;
+		}
+	if (camLeft || (m_player->getPos().x - m_player->getSize().x / 2 < m_cameraPos.x + m_cameraSafeBounds.x))
+		if (m_cameraPos.x > (0 + m_tileWidth / 2)) {
+			m_cameraPos.x -= cameraSpeed * deltaTime;
+		}
+	if (camRight || (m_player->getPos().x + m_player->getSize().x / 2) > (m_cameraPos.x + getWindowWidth()) - m_cameraSafeBounds.x)
+		if (m_cameraPos.x + (getWindowWidth() + m_tileWidth / 2) < (m_mapWidth * m_tileWidth)) {
+			m_cameraPos.x += cameraSpeed * deltaTime;
+		}
+
+	// Correct mouse position for new camera location
+	m_mousePos += m_cameraPos;
+	m_player->setMousePos(m_mousePos);
+#pragma endregion
 
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))

@@ -3,12 +3,14 @@
 #include "GlobalConfig.h"
 #include "Components\JM_Component.h"
 #include "Behaviours\Behaviour.h"
+#include "Tileset.h"
 
 #include <Renderer2D.h>
 #include <glm\glm.hpp>
 #include <Texture.h>
 
-GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)) {
+GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)),
+	m_size(glm::vec2(tex->getWidth(), tex->getHeight())) {
 }
 
 GameObject::~GameObject() {
@@ -87,8 +89,8 @@ void GameObject::scale(const glm::vec2 & _scale) {
 	m_scaleAmount = _scale;
 }
 
-const glm::vec2 & GameObject::getScale() {
-	return m_scaleAmount;
+const glm::vec2 & GameObject::getSize() {
+	return m_size * m_scaleAmount;
 }
 
 void GameObject::setVelocity(const glm::vec2& _velocity) {
@@ -135,6 +137,10 @@ float GameObject::getRotation() {
 #pragma endregion
 
 #pragma region Screen Functions
+void GameObject::checkCollisions(const std::vector<jm::Object>& objList) {
+
+}
+
 void GameObject::wrapScreenBounds() {
 	ini_t *cfg = GlobalConfig::getInstance();
 	int winWidth = cfg->get("DisplayOptions", "WindowWidth", 1);
@@ -162,7 +168,14 @@ void GameObject::constrainToScreenBounds(bool bounce) {
 			applyForce(glm::vec2(-(m_velocity.x * REFLECTION_FORCE), 0));
 		}
 	} else {
-
+		if (hitLeft)
+			setPos(glm::vec2(width / 2, m_pos.y));
+		else if (hitRight)
+			setPos(glm::vec2(winWidth - width / 2, m_pos.y));
+		if (hitBottom)
+			setPos(glm::vec2(m_pos.x, height / 2));
+		else if (hitTop)
+			setPos(glm::vec2(m_pos.x, winHeight - height / 2));
 	}
 }
 

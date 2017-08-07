@@ -13,6 +13,9 @@ namespace aie {
 	class Renderer2D;
 	class Texture;
 };
+namespace jm {
+	struct Object;
+}
 
 class GameObject {
 public:
@@ -38,7 +41,7 @@ public:
 	/** Scale the size of the image by specified amount*/
 	void scale(const glm::vec2& _scale);
 	/** Get the amount of scaling applied*/
-	const glm::vec2 &getScale();
+	const glm::vec2 &getSize();
 
 	/** Set the current travel velocity of the object*/
 	void setVelocity(const glm::vec2& _velocity);
@@ -73,6 +76,8 @@ public:
 
 #pragma endregion
 
+	void checkCollisions(const std::vector<jm::Object> &objList);
+
 	/** When object exits one edge of the screen, move them to the opposite edge*/
 	void wrapScreenBounds();
 	/** When the object hits the edge of the window, bounce off and change direction*/
@@ -81,7 +86,7 @@ public:
 	void destroyOnExitScreen();
 
 protected:
-	glm::vec2 m_pos, m_velocity, m_acceleration, m_scaleAmount;
+	glm::vec2 m_pos, m_size, m_velocity, m_acceleration, m_scaleAmount;
 	const float maxSpeed = 100;
 	float m_rotation;
 	float m_friction;

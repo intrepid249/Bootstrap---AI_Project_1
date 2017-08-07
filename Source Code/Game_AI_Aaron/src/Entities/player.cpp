@@ -100,16 +100,12 @@ void Player::update(float deltaTime) {
 
 	aie::Input *input = aie::Input::getInstance();
 
-	int mx, my;
-	input->getMouseXY(&mx, &my);
-	glm::vec2 mousePos(mx, my);
-
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL)) {
 		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
-			m_seekBehaviour->setTarget(mousePos);
+			m_seekBehaviour->setTarget(m_mousePos);
 			setBehaviour(m_seekBehaviour);
 		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
-			m_fleeBehaviour->setTarget(mousePos);
+			m_fleeBehaviour->setTarget(m_mousePos);
 			setBehaviour(m_fleeBehaviour);
 		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
 			if (getBehaviour() != m_followPathBehaviour.get()) {
@@ -117,14 +113,14 @@ void Player::update(float deltaTime) {
 				m_path->clear();
 			}
 
-			m_path->addPathSegment(mousePos);
+			m_path->addPathSegment(m_mousePos);
 		}
 	}
 
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT)) {
 		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
 			std::vector<Graph2D::Node*> nearbyNodes;
-			m_graph->getNearbyNodes(mousePos, 15, nearbyNodes);
+			m_graph->getNearbyNodes(m_mousePos, 15, nearbyNodes);
 
 			if (!nearbyNodes.empty()) {
 				m_startNode = nearbyNodes[0];
@@ -133,7 +129,7 @@ void Player::update(float deltaTime) {
 
 		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
 			std::vector<Graph2D::Node*> nearbyNodes;
-			m_graph->getNearbyNodes(mousePos, 15, nearbyNodes);
+			m_graph->getNearbyNodes(m_mousePos, 15, nearbyNodes);
 
 			if (!nearbyNodes.empty()) {
 				m_endNode = nearbyNodes[0];
@@ -201,4 +197,8 @@ void Player::setGraph(Graph2D * graph) {
 
 Graph2D * Player::getGraph() {
 	return m_graph;
+}
+
+void Player::setMousePos(const glm::vec2 &mousePos) {
+	m_mousePos = mousePos;
 }

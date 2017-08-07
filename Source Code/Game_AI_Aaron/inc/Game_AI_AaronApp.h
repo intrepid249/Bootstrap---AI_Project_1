@@ -41,8 +41,10 @@ public:
 protected:
 	std::shared_ptr<aie::Renderer2D>	m_renderer;
 
+	/// Camera information
 	bool allowFreeCameraMovement;
 	glm::vec2 m_cameraPos;
+	glm::vec2 m_cameraSafeBounds;
 
 	/// Map information
 	pugi::xml_document m_mapData;

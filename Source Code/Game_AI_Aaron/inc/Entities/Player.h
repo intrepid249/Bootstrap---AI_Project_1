@@ -29,6 +29,8 @@ public:
 	void setGraph(Graph2D *graph);
 	Graph2D *getGraph();
 
+	void setMousePos(const glm::vec2 &mousePos);
+
 protected:
 	std::shared_ptr<BKeyboardControlled> m_keyboardBehaviour;
 	std::shared_ptr<BSeek> m_seekBehaviour, m_fleeBehaviour;
@@ -41,6 +43,8 @@ protected:
 	std::unique_ptr<Pathfinder> m_pathfinder;
 
 	std::unique_ptr<aie::Font> m_font;
+
+	glm::vec2 m_mousePos;
 
 private:
 	const char *m_algorithm;
