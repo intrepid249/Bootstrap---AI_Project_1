@@ -114,16 +114,15 @@ bool Game_AI_AaronApp::startup() {
 			std::string layerName = (*iter).attribute("name").as_string();
 
 			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData.size(); tileIndex++) {
-				std::cout << currentLayer.layerData[tileIndex] << ", ";
+				//std::cout << currentLayer.layerData[tileIndex] << ", ";
 				int tempGid = std::stoi(currentLayer.layerData[tileIndex]); // For some reason all the layer data for "top" layer is 0
 
 				// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
-				if (tempGid > m_tilesets[currentTilesetIndex].tileCount) {
+				if (currentTilesetIndex >= 0 && tempGid > m_tilesets[currentTilesetIndex].tileCount) {
 					tempGid -= (currentTilesetIndex == 0) ? m_tilesets[currentTilesetIndex].tileCount : m_tilesets[currentTilesetIndex - 1].tileCount;
 					if (currentTilesetIndex + 1 < m_tilesets.size())
 						currentTilesetIndex++;
-				}
-				else if (tempGid != 0 && tempGid < m_tilesets[currentTilesetIndex].firstGID)
+				} else if (currentTilesetIndex > 0 && tempGid != 0 && tempGid < m_tilesets[currentTilesetIndex].firstGID)
 					currentTilesetIndex--;
 
 				jm::Tile t;
@@ -147,7 +146,7 @@ bool Game_AI_AaronApp::startup() {
 				else if (currentLayer.name == "foreground")
 					t.layerDepth = -1;
 				else
-					t.layerDepth = -5;
+					t.layerDepth = -1;
 
 				m_backgroundTiles[layerName].push_back(t);
 			}
@@ -229,6 +228,27 @@ void Game_AI_AaronApp::update(float deltaTime) {
 
 	ImGui::SetWindowPos(ImVec2(0, 0));
 	ImGui::SetWindowSize(ImVec2(-1, 250));
+
+	if (ImGui::CollapsingHeader("Player")) {
+		ini->select("Player");
+
+		static int horizontalPadding = 50;
+		static int verticalPadding = 50;
+
+		ImGui::SliderInt("Camera X Padding", &horizontalPadding, 0, 100);
+		ImGui::SliderInt("Camera Y Padding", &verticalPadding, 0, 100);
+
+		ImGui::Separator();
+
+		if (ImGui::Button("Update Camera Padding")) {
+
+		}
+		ImGui::SameLine(180);
+
+		if (ImGui::Button("Save Camera Padding")) {
+
+		}
+	}
 
 	ImGui::Text("Hold LeftCtrl to interact with player's behaviours");
 	ImGui::BulletText("Left Mouse Button: Seek toward a point");
@@ -344,17 +364,23 @@ void Game_AI_AaronApp::draw() {
 		base->render(m_renderer.get());
 
 #pragma region Tileset
+	static int currentTilesetIndex = 0;
 	pugi::xml_node map = m_mapData.child("map");
 	for (auto layerIter = map.children("layer").begin(); layerIter != map.children("layer").end(); layerIter++) {
 		std::string layerName = (*layerIter).attribute("name").as_string();
 		float x = 0, y = 0;
 		for (auto iter = m_backgroundTiles[layerName].begin(); iter != m_backgroundTiles[layerName].end(); iter++) {
 			jm::Tile t = (*iter);
+
+			int tempGid = t.gid;
+			//jm::Tileset tset = m_tilesets[currentTilesetIndex];
+			// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
+
 			if (t.image != nullptr) {
 				float ux = (float)(t.uv_x) * (t.width / (float)t.image->getWidth());
 				float uy = (float)(t.uv_y) * (t.height / (float)t.image->getHeight());
 				// Modify the UV region of the sprite to display the selected tile within the image
-				m_renderer->setUVRect(ux, uy, t.width / m_tilesets[0].imageWidth, t.height / m_tilesets[0].imageHeight);
+				m_renderer->setUVRect(ux, uy, t.width / (float)t.image->getWidth(), t.height / (float)t.image->getHeight());
 
 				m_renderer->drawSprite(t.image, x * t.width, (m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, t.layerDepth, 0, 1);
 
@@ -374,7 +400,7 @@ void Game_AI_AaronApp::draw() {
 	for (auto iter = m_collisionTiles.begin(); iter != m_collisionTiles.end(); iter++) {
 		m_renderer->setRenderColour(1, 0, 0, 0.3);
 		jm::Object obj = (*iter);
-		m_renderer->drawBox(obj.x + obj.width / 2, (m_mapHeight * m_tileHeight) - (obj.y + obj.height / 2), obj.width, obj.height);
+		//m_renderer->drawBox(obj.x + obj.width / 2, (m_mapHeight * m_tileHeight) - (obj.y + obj.height / 2), obj.width, obj.height);
 		m_renderer->setRenderColour(1, 1, 1, 1);
 	}
 #pragma endregion

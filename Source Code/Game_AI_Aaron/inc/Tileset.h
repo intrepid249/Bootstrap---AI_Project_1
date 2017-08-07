@@ -7,9 +7,9 @@ namespace aie {
 
 namespace jm {
 	struct Tileset {
-		Tileset(unsigned int _firstGid, std::string _name, unsigned int _tileWidth, unsigned int _tileHeight,
-			unsigned int _tileCount, unsigned int _columns,
-			unsigned int _imgWidth, unsigned int _imgHeight) {
+		Tileset(int _firstGid, std::string _name, int _tileWidth, int _tileHeight,
+			int _tileCount, int _columns,
+			int _imgWidth, int _imgHeight) {
 			firstGID = _firstGid;
 			name = _name.c_str();
 			tileWidth = _tileWidth;
@@ -20,26 +20,26 @@ namespace jm {
 			imageHeight = _imgHeight;
 		}
 
-		unsigned int firstGID;
+		int firstGID;
 		const char * name;
-		unsigned int tileWidth;
-		unsigned int tileHeight;
-		unsigned int tileCount;
-		unsigned int columns;
-		unsigned int imageWidth;
-		unsigned int imageHeight;
+		int tileWidth;
+		int tileHeight;
+		int tileCount;
+		int columns;
+		int imageWidth;
+		int imageHeight;
 	};
 
 	struct TileLayer {
-		TileLayer(std::string name, unsigned int width, unsigned int height) {
+		TileLayer(std::string name, int width, int height) {
 			this->name = name;
 			this->width = width;
 			this->height = height;
 		}
 
 		std::string name;
-		unsigned int width;
-		unsigned int height;
+		int width;
+		int height;
 		std::vector<std::string> layerData;
 	};
 

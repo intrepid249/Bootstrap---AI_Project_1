@@ -48,7 +48,7 @@ protected:
 	pugi::xml_document m_mapData;
 	std::vector<jm::Tileset> m_tilesets;								// Information about each tileset
 	std::vector<std::string> m_tilesetImageNames;						// Store names of the tilesets for subscript accessing texture map
-	unsigned int m_mapWidth, m_mapHeight, m_tileWidth, m_tileHeight;
+	int m_mapWidth, m_mapHeight, m_tileWidth, m_tileHeight;
 	std::vector<jm::TileLayer> m_tileGid_Layers;						// Stores the gid information about each tile in an array
 	std::map<std::string, std::vector<jm::Tile>> m_backgroundTiles;		// Data about each tile in the map, indexed by layer name
 	std::vector<jm::Object> m_collisionTiles;							// Data about collider objects;
