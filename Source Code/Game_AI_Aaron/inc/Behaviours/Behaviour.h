@@ -24,7 +24,12 @@ public:
 	/** Sets the speed the GameObject the component is attached to will accelerate at*/
 	void setStrength(float val) { m_strength = val; }
 	/** Get the speed the GameObject the component is attached is accelerating at*/
-	float getStrength() { return m_strength; }
+	const float getStrength() { return m_strength; }
+
+	/** Set the amount of scaling applied to the behaviours strength*/
+	void setPriorityWeight(float weight) { m_priorityWeight = weight; }
+	/** Get the amount of scaling applied to the behaviours strength*/
+	const float getPriorityWeight() { return m_priorityWeight; }
 
 	/** Sets the game object attached to the behaviour*/
 	void setParent(GameObject *parent) { m_parentObject = parent; }
@@ -34,5 +39,5 @@ protected:
 	
 	float m_strength = 0;
 
-	float m_priorityWeight; // Amount to scale the 
+	float m_priorityWeight; // Amount to scale the force affecting the entity by
 };

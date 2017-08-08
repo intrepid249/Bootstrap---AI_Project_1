@@ -75,8 +75,8 @@ public:
 	bool isDrawn();
 
 	/** Set the current object behaviour*/
-	void setBehaviour(std::shared_ptr<Behaviour> behaviour);
-	/** Return the current object behaviour*/
+	void addBehaviour(std::shared_ptr<Behaviour> behaviour);
+	/** Return  object behaviour*/
 	Behaviour *getBehaviour();
 
 	/** Set the angle of rotation applied to the sprite image and other rotation calculations*/
@@ -85,7 +85,7 @@ public:
 	float getRotation();
 
 #pragma endregion
-
+	/** Perform collision checking and reaction updates*/
 	void checkCollisions(const std::vector<jm::Object> &objList);
 
 	/** When object exits one edge of the screen, move them to the opposite edge*/
@@ -107,7 +107,7 @@ protected:
 	Graph2D *m_graph;
 
 	std::vector<std::shared_ptr<JM_Component>> m_components;
-	std::shared_ptr<Behaviour> m_behaviour;
+	std::vector<std::shared_ptr<Behaviour>> m_behaviours;
 
 	// Used to compound the force when 'Bouncing' off objects
 	const float REFLECTION_FORCE = 250;

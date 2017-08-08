@@ -10,7 +10,7 @@
 #include <Texture.h>
 
 GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)),
-	m_size(glm::vec2(tex->getWidth(), tex->getHeight())) {
+m_size(glm::vec2(tex->getWidth(), tex->getHeight())) {
 }
 
 GameObject::~GameObject() {
@@ -29,8 +29,10 @@ void GameObject::update(float deltaTime) {
 		for (size_t i = 0; i < m_components.size(); ++i)
 			m_components[i]->update(deltaTime);
 
-		if (m_behaviour != nullptr)
-			m_behaviour->doActions(deltaTime);
+		// Update all behaviours
+		for (auto behaviour : m_behaviours)
+			if (behaviour != nullptr)
+				behaviour->doActions(deltaTime);
 	}
 }
 
@@ -40,7 +42,7 @@ void GameObject::render(aie::Renderer2D * renderer, float depth) {
 		m_rotation = atan2f(targetHeading.y - m_pos.y, targetHeading.x - m_pos.x);
 
 		if (m_tex != nullptr)
-			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, m_tex->getWidth() * m_scaleAmount.x, m_tex->getHeight() * m_scaleAmount.y, 
+			renderer->drawSprite(m_tex, m_pos.x, m_pos.y, m_tex->getWidth() * m_scaleAmount.x, m_tex->getHeight() * m_scaleAmount.y,
 				m_rotation, depth);
 		else
 			renderer->drawBox(m_pos.x, m_pos.y, 10, 10, 0.2f);
