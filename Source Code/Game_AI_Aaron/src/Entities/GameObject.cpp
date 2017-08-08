@@ -108,6 +108,15 @@ void GameObject::setFriction(const float & _friction) {
 const float & GameObject::getFriction() {
 	return m_friction;
 }
+
+void GameObject::setGraph(Graph2D * graph) {
+	m_graph = graph;
+}
+
+Graph2D * Player::getGraph() {
+	return m_graph;
+}
+
 void GameObject::addComponent(std::shared_ptr<JM_Component> _component) {
 	m_components.push_back(std::move(_component));
 }
@@ -138,7 +147,24 @@ float GameObject::getRotation() {
 
 #pragma region Screen Functions
 void GameObject::checkCollisions(const std::vector<jm::Object>& objList) {
+	float width = (m_tex != nullptr) ? getSize().x : 0;
+	float height = (m_tex != nullptr) ? getSize().x : 0;
 
+	for (auto iter = objList.begin(); iter != objList.end(); iter++) {
+		jm::Object obj = (*iter);
+
+		bool hitLeft = (m_pos.x - width / 2 < obj.x + obj.width / 2), hitRight = (m_pos.x + width / 2 > obj.x - obj.width / 2);
+		bool hitBottom = (m_pos.y - height / 2 < obj.y + obj.height / 2), hitTop = (m_pos.y + width / 2 > obj.y - obj.height / 2);
+
+		if (hitLeft)
+			setPos(glm::vec2(m_pos.x + width / 2, m_pos.y));
+		if (hitRight)
+			setPos(glm::vec2(m_pos.x - width / 2, m_pos.y));
+		if (hitBottom)
+			setPos(glm::vec2(m_pos.x, m_pos.y + width / 2));
+		if (hitTop)
+			setPos(glm::vec2(m_pos.x, m_pos.y - width / 2));
+	}
 }
 
 void GameObject::wrapScreenBounds() {
@@ -152,15 +178,15 @@ void GameObject::wrapScreenBounds() {
 	if (m_pos.y > winHeight) setPos(glm::vec2(0, m_pos.x));
 }
 
-void GameObject::constrainToScreenBounds(bool bounce) {
+void GameObject::constrainToScreenBounds(bool bounce, glm::vec2 cameraPos) {
 	ini_t *cfg = GlobalConfig::getInstance();
 	float winWidth = cfg->get("DisplayOptions", "WindowWidth", float());
 	float winHeight = cfg->get("DisplayOptions", "WindowHeight", float());
-	float width = (m_tex != nullptr) ? (float)m_tex->getWidth() : 0;
-	float height = (m_tex != nullptr) ? (float)m_tex->getHeight() : 0;
+	float width = (m_tex != nullptr) ? getSize().x : 0;
+	float height = (m_tex != nullptr) ? getSize().x : 0;
 
-	bool hitLeft = (m_pos.x - width / 2 < 0), hitRight = (m_pos.x + width / 2 > winWidth);
-	bool hitBottom = (m_pos.y - height / 2 < 0), hitTop = (m_pos.y + height / 2 > winHeight);
+	bool hitLeft = ((m_pos.x - width / 2) - cameraPos.x < 0), hitRight = ((m_pos.x + width / 2) - cameraPos.x > winWidth);
+	bool hitBottom = ((m_pos.y - height / 2) - cameraPos.y < 0), hitTop = ((m_pos.y + height / 2) - cameraPos.y > winHeight);
 
 	if (bounce) {
 		if (hitLeft || hitRight) {

@@ -98,6 +98,7 @@
     <ClCompile Include="src\Blackboard\Blackboard.cpp" />
     <ClCompile Include="src\Components\CBehaviourController.cpp" />
     <ClCompile Include="src\Components\CKeyboardController.cpp" />
+    <ClCompile Include="src\Entities\Enemies\Enemy.cpp" />
     <ClCompile Include="src\Entities\GameObject.cpp" />
     <ClCompile Include="src\Entities\HomeBase.cpp" />
     <ClCompile Include="src\Entities\player.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="inc\Components\CBehaviourController.h" />
     <ClInclude Include="inc\Components\CKeyboardController.h" />
     <ClInclude Include="inc\Components\JM_Component.h" />
+    <ClInclude Include="inc\Entities\Enemies\Enemy.h" />
     <ClInclude Include="inc\Entities\GameObject.h" />
     <ClInclude Include="inc\Entities\HomeBase.h" />
     <ClInclude Include="inc\Entities\Player.h" />

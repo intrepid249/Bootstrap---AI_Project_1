@@ -121,7 +121,7 @@ bool Game_AI_AaronApp::startup() {
 				// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
 				if (currentTilesetIndex >= 0 && tempGid > m_tilesets[currentTilesetIndex].tileCount) {
 					tempGid -= (currentTilesetIndex == 0) ? m_tilesets[currentTilesetIndex].tileCount : m_tilesets[currentTilesetIndex - 1].tileCount;
-					if (currentTilesetIndex + 1 < m_tilesets.size())
+					if ((unsigned int)currentTilesetIndex + 1 < m_tilesets.size())
 						currentTilesetIndex++;
 				} else if (currentTilesetIndex > 0 && tempGid != 0 && tempGid < m_tilesets[currentTilesetIndex].firstGID)
 					currentTilesetIndex--;
@@ -325,8 +325,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	updateGraph(deltaTime);
 
 	m_player->update(deltaTime);
-	m_player->checkCollisions(m_collisionTiles);
-	m_player->constrainToScreenBounds(false);
+	//m_player->checkCollisions(m_collisionTiles);
+	m_player->constrainToScreenBounds(false, m_cameraPos);
 	//m_player->wrapScreenBounds();
 
 	for (auto base : m_baseList)
@@ -429,7 +429,7 @@ void Game_AI_AaronApp::draw() {
 				// Modify the UV region of the sprite to display the selected tile within the image
 				m_renderer->setUVRect(ux, uy, t.width / (float)t.image->getWidth(), t.height / (float)t.image->getHeight());
 
-				m_renderer->drawSprite(t.image, x * t.width, (m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, t.layerDepth, 0, 1);
+				m_renderer->drawSprite(t.image, x * t.width, (float)(m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, (float)t.layerDepth, 0, 1);
 
 				m_renderer->setUVRect(0, 0, 1, 1);
 			}
@@ -439,13 +439,12 @@ void Game_AI_AaronApp::draw() {
 				continue;
 			} else
 				x = 0;
-
 			y++;
 		}
 	}
 
 	for (auto iter = m_collisionTiles.begin(); iter != m_collisionTiles.end(); iter++) {
-		m_renderer->setRenderColour(1, 0, 0, 0.3);
+		m_renderer->setRenderColour(1, 0, 0, 0.3f);
 		jm::Object obj = (*iter);
 		//m_renderer->drawBox(obj.x + obj.width / 2, (m_mapHeight * m_tileHeight) - (obj.y + obj.height / 2), obj.width, obj.height);
 		m_renderer->setRenderColour(1, 1, 1, 1);

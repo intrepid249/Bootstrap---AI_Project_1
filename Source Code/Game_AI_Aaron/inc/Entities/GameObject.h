@@ -6,7 +6,12 @@ typedef INI<> ini_t;
 #include <vector>
 #include <memory>
 
+#include "Graph\Graph2D.h"
+
 class Behaviour;
+
+class Path;
+class Pathfinder;
 
 class JM_Component;
 namespace aie {
@@ -53,6 +58,11 @@ public:
 	/** Gets the strength of the opposing force to apply to the velocity*/
 	const float &getFriction();
 
+	/** Set the graph that's being used for pathfinding*/
+	void setGraph(Graph2D *graph);
+	/** Get the graph that's being used for pathfinding*/
+	Graph2D *getGraph();
+
 	/** Append components into the object*/
 	void addComponent(std::shared_ptr<JM_Component> _component);
 	/** Attain external access to a component of a defined type*/
@@ -81,7 +91,7 @@ public:
 	/** When object exits one edge of the screen, move them to the opposite edge*/
 	void wrapScreenBounds();
 	/** When the object hits the edge of the window, bounce off and change direction*/
-	void constrainToScreenBounds(bool bounce);
+	void constrainToScreenBounds(bool bounce, glm::vec2 cameraPos = glm::vec2(0));
 	/** Flag the object for unuse when it exits screen boundaries*/
 	void destroyOnExitScreen();
 
@@ -93,6 +103,8 @@ protected:
 	bool m_drawn;
 
 	aie::Texture *m_tex;
+
+	Graph2D *m_graph;
 
 	std::vector<std::shared_ptr<JM_Component>> m_components;
 	std::shared_ptr<Behaviour> m_behaviour;

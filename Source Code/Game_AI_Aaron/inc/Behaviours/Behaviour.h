@@ -33,4 +33,6 @@ protected:
 	GameObject *m_parentObject = nullptr;
 	
 	float m_strength = 0;
+
+	float m_priorityWeight; // Amount to scale the 
 };

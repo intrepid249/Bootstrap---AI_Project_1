@@ -191,14 +191,6 @@ void Player::render(aie::Renderer2D * renderer) {
 	renderer->drawText(ResourceManager::getFonts()["default"].get(), buffer, 10, 10);
 }
 
-void Player::setGraph(Graph2D * graph) {
-	m_graph = graph;
-}
-
-Graph2D * Player::getGraph() {
-	return m_graph;
-}
-
 void Player::setMousePos(const glm::vec2 &mousePos) {
 	m_mousePos = mousePos;
 }
