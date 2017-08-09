@@ -4,7 +4,7 @@
 #include <Renderer2D.h>
 #include <glm\glm.hpp>
 
-BSeek::BSeek() : m_innerRadius(0), m_outerRadius(0) {
+BSeek::BSeek() : Behaviour(), m_innerRadius(0), m_outerRadius(0) {
 
 }
 
@@ -42,8 +42,8 @@ void BSeek::doActions(float deltaTime) {
 			desired_velocity = glm::normalize(desired_velocity) * m_strength;
 		}
 
-
-		m_parentObject->applyForce(desired_velocity);
+		
+		m_parentObject->applyForce(desired_velocity * getForceScale());
 
 
 		m_lastPos = m_parentObject->getPos();

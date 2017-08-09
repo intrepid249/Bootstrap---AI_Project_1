@@ -10,7 +10,9 @@
 #include <random>
 #include <Renderer2D.h>
 
-BWander::BWander() : m_newRotation(0), m_projectionDistance(10), m_radius(20) {
+unsigned int Behaviour::ms_nextID = 0;
+
+BWander::BWander() : Behaviour(), m_newRotation(0), m_projectionDistance(10), m_radius(20) {
 	m_seeker = std::shared_ptr<BSeek>(new BSeek());
 	m_seeker->setStrength(PLAYER_MOVEMENT_SPEED);
 }
@@ -36,7 +38,7 @@ void BWander::doActions(float deltaTime) {
 		glm::vec2 targetForce = glm::vec2(cosf(m_newRotation) * m_radius, sinf(m_newRotation) * m_radius) + m_circleCentre;
 
 		// Apply a force towards the new position
-		m_parentObject->applyForce(targetForce);
+		m_parentObject->applyForce(targetForce * getForceScale());
 	}
 }
 

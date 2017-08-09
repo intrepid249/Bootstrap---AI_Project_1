@@ -5,6 +5,7 @@ typedef INI<> ini_t;
 #include <glm\vec2.hpp>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 #include "Graph\Graph2D.h"
 
@@ -46,7 +47,7 @@ public:
 	/** Scale the size of the image by specified amount*/
 	void scale(const glm::vec2& _scale);
 	/** Get the amount of scaling applied*/
-	const glm::vec2 &getSize();
+	const glm::vec2 getSize();
 
 	/** Set the current travel velocity of the object*/
 	void setVelocity(const glm::vec2& _velocity);
@@ -74,10 +75,12 @@ public:
 	/** Gets the current display status of the object*/
 	bool isDrawn();
 
-	/** Set the current object behaviour*/
+	/** Add a behaviour to the collection*/
 	void addBehaviour(std::shared_ptr<Behaviour> behaviour);
-	/** Return  object behaviour*/
-	Behaviour *getBehaviour();
+	/** Remove a specified behaviour*/
+	void removeBehaviour(std::shared_ptr<Behaviour> behaviour);
+	/** Get currently active behaviours*/
+	std::unordered_map<unsigned int, std::shared_ptr<Behaviour>> getBehaviours();
 
 	/** Set the angle of rotation applied to the sprite image and other rotation calculations*/
 	void setRotation(float angle);
@@ -105,9 +108,12 @@ protected:
 	aie::Texture *m_tex;
 
 	Graph2D *m_graph;
+	std::unique_ptr<Path> m_path;
+	Graph2D::Node *m_startNode, *m_endNode;
+	std::unique_ptr<Pathfinder> m_pathfinder;
 
 	std::vector<std::shared_ptr<JM_Component>> m_components;
-	std::vector<std::shared_ptr<Behaviour>> m_behaviours;
+	std::unordered_map<unsigned int, std::shared_ptr<Behaviour>> m_behaviours;
 
 	// Used to compound the force when 'Bouncing' off objects
 	const float REFLECTION_FORCE = 250;

@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_endNode(nullptr) {
+Player::Player(aie::Texture *tex) : GameObject(tex) {
 	setFriction(1);
 
 	m_keyboardBehaviour = std::shared_ptr<BKeyboardControlled>(new BKeyboardControlled());
@@ -31,17 +31,18 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 	m_seekBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 	m_seekBehaviour->setInnerRadius(20);
 	m_seekBehaviour->setOuterRadius(200);
-	m_seekBehaviour->onInnerRadiusEnter([this]() {
-		setBehaviour(m_keyboardBehaviour);
-	});
+	m_seekBehaviour->setPriorityWeight(0.2);
+	//m_seekBehaviour->onInnerRadiusEnter([this]() {
+	//	setBehaviour(m_keyboardBehaviour);
+	//});
 
 	m_fleeBehaviour = std::shared_ptr<BSeek>(new BSeek());
 	m_fleeBehaviour->setParent(this);
 	m_fleeBehaviour->setStrength(-PLAYER_MOVEMENT_SPEED);
 	m_fleeBehaviour->setOuterRadius(200);
-	m_fleeBehaviour->onOuterRadiusExit([this]() {
-		setBehaviour(m_keyboardBehaviour);
-	});
+	//m_fleeBehaviour->onOuterRadiusExit([this]() {
+	//	setBehaviour(m_keyboardBehaviour);
+	//});
 
 	m_path = std::unique_ptr<Path>(new Path());
 	m_followPathBehaviour = std::shared_ptr<BFollowPath>(new BFollowPath());
@@ -52,8 +53,8 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 	m_followPathBehaviour->onLastNodeReached([this]() {
 		if (m_followPathBehaviour->isPatrolling())
 			m_followPathBehaviour->setPatrolDir(m_followPathBehaviour->getPatrolDir() * -1);
-		else
-			setBehaviour(m_keyboardBehaviour);
+		else;
+			//setBehaviour(m_keyboardBehaviour);
 	});
 
 	m_wanderBehavour = std::shared_ptr<BWander>(new BWander());
@@ -61,8 +62,9 @@ Player::Player(aie::Texture *tex) : GameObject(tex), m_startNode(nullptr), m_end
 	m_wanderBehavour->setStrength(1);
 	m_wanderBehavour->setProjectionDistance(50);
 	m_wanderBehavour->setRadius(100);
+	m_wanderBehavour->setPriorityWeight(1);
 
-	setBehaviour(m_keyboardBehaviour);
+	addBehaviour(m_wanderBehavour);
 }
 
 Player::~Player() {
@@ -79,11 +81,11 @@ void Player::update(float deltaTime) {
 		if (ImGui::Checkbox("Patrolling", &patrolFlag))
 			m_followPathBehaviour->isPatrolling(patrolFlag);
 
-		static bool wanderFlag = false;
-		if (ImGui::Checkbox("Wander", &wanderFlag))
-			setBehaviour(m_wanderBehavour);
-		if (!wanderFlag)
-			setBehaviour(m_keyboardBehaviour);
+		//static bool wanderFlag = false;
+		//if (ImGui::Checkbox("Wander", &wanderFlag))
+		//	setBehaviour(m_wanderBehavour);
+		//if (!wanderFlag)
+		//	setBehaviour(m_keyboardBehaviour);
 
 
 		// Add a tree
@@ -103,18 +105,18 @@ void Player::update(float deltaTime) {
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL)) {
 		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
 			m_seekBehaviour->setTarget(m_mousePos);
-			setBehaviour(m_seekBehaviour);
+			addBehaviour(m_seekBehaviour);
 		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
 			m_fleeBehaviour->setTarget(m_mousePos);
-			setBehaviour(m_fleeBehaviour);
-		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
+			addBehaviour(m_fleeBehaviour);
+		} /*else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
 			if (getBehaviour() != m_followPathBehaviour.get()) {
 				setBehaviour(m_followPathBehaviour);
 				m_path->clear();
 			}
 
 			m_path->addPathSegment(m_mousePos);
-		}
+		}*/
 	}
 
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT)) {
@@ -154,7 +156,7 @@ void Player::update(float deltaTime) {
 					m_path->addPathSegment((*iter));
 				}
 
-				setBehaviour(m_followPathBehaviour);
+				//setBehaviour(m_followPathBehaviour);
 			}
 		}
 
@@ -164,31 +166,31 @@ void Player::update(float deltaTime) {
 		}
 	}
 
-	if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() &&
-		!(input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL) || input->isKeyDown(aie::INPUT_KEY_LEFT_ALT) 
-			|| input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT) || input->isKeyDown(aie::INPUT_KEY_ENTER))) {
-		setBehaviour(m_keyboardBehaviour);
-	}
+	//if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() &&
+	//	!(input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL) || input->isKeyDown(aie::INPUT_KEY_LEFT_ALT) 
+	//		|| input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT) || input->isKeyDown(aie::INPUT_KEY_ENTER))) {
+	//	setBehaviour(m_keyboardBehaviour);
+	//}
 }
 
 void Player::render(aie::Renderer2D * renderer) {
 	GameObject::render(renderer);
 
-	char buffer[64];
-	if (m_behaviour == m_keyboardBehaviour)
-		sprintf_s(buffer, "Keyboard");
-	else if (m_behaviour == m_seekBehaviour)
-		sprintf_s(buffer, "Seek");
-	else if (m_behaviour == m_fleeBehaviour)
-		sprintf_s(buffer, "Flee");
-	else if (m_behaviour == m_followPathBehaviour)
-		sprintf_s(buffer, "Follow Path");
-	else if (m_behaviour == m_wanderBehavour)
-		sprintf_s(buffer, "Wander");
-	else
-		sprintf_s(buffer, "Behaviour unknown");
+	//char buffer[64];
+	//if (m_behaviour == m_keyboardBehaviour)
+	//	sprintf_s(buffer, "Keyboard");
+	//else if (m_behaviour == m_seekBehaviour)
+	//	sprintf_s(buffer, "Seek");
+	//else if (m_behaviour == m_fleeBehaviour)
+	//	sprintf_s(buffer, "Flee");
+	//else if (m_behaviour == m_followPathBehaviour)
+	//	sprintf_s(buffer, "Follow Path");
+	//else if (m_behaviour == m_wanderBehavour)
+	//	sprintf_s(buffer, "Wander");
+	//else
+	//	sprintf_s(buffer, "Behaviour unknown");
 
-	renderer->drawText(ResourceManager::getFonts()["default"].get(), buffer, 10, 10);
+	//renderer->drawText(ResourceManager::getFonts()["default"].get(), buffer, 10, 10);
 }
 
 void Player::setMousePos(const glm::vec2 &mousePos) {

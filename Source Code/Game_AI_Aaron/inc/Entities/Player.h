@@ -33,10 +33,6 @@ protected:
 	std::shared_ptr<BFollowPath> m_followPathBehaviour;
 	std::shared_ptr<BWander> m_wanderBehavour;
 
-	std::unique_ptr<Path> m_path;
-	Graph2D::Node *m_startNode, *m_endNode;
-	std::unique_ptr<Pathfinder> m_pathfinder;
-
 	std::unique_ptr<aie::Font> m_font;
 
 	glm::vec2 m_mousePos;

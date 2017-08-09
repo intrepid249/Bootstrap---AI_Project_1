@@ -35,7 +35,7 @@ void BFollowPath::doActions(float deltaTime) {
 
 		// Seek toward the point
 		glm::vec2 dir_to_point = glm::normalize(point - m_parentObject->getPos()) * m_strength;
-		m_parentObject->applyForce(dir_to_point);
+		m_parentObject->applyForce(dir_to_point * getForceScale());
 
 		m_lastPos = m_parentObject->getPos();
 	}

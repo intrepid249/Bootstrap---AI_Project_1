@@ -5,12 +5,15 @@
 #include "Behaviours\Behaviour.h"
 #include "Tileset.h"
 
+#include "Graph\Path.h"
+#include "Pathfinding\Pathfinder.h"
+
 #include <Renderer2D.h>
 #include <glm\glm.hpp>
 #include <Texture.h>
 
 GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)),
-m_size(glm::vec2(tex->getWidth(), tex->getHeight())) {
+m_size(glm::vec2(tex->getWidth(), tex->getHeight())), m_startNode(nullptr), m_endNode(nullptr) {
 }
 
 GameObject::~GameObject() {
@@ -30,9 +33,9 @@ void GameObject::update(float deltaTime) {
 			m_components[i]->update(deltaTime);
 
 		// Update all behaviours
-		for (auto behaviour : m_behaviours)
-			if (behaviour != nullptr)
-				behaviour->doActions(deltaTime);
+		for (auto iter = m_behaviours.begin(); iter != m_behaviours.end(); iter++)
+			if ((*iter).second != nullptr)
+				(*iter).second->doActions(deltaTime);
 	}
 }
 
@@ -64,8 +67,10 @@ void GameObject::render(aie::Renderer2D * renderer, float depth) {
 		for (size_t i = 0; i < m_components.size(); ++i)
 			m_components[i]->render(renderer);
 
-		if (m_behaviour != nullptr)
-			m_behaviour->debugRender(renderer);
+		// Perform debug rendering (if any) for all behaviours
+		for (auto iter = m_behaviours.begin(); iter != m_behaviours.end(); iter++)
+			if ((*iter).second != nullptr)
+				(*iter).second->debugRender(renderer);
 #endif // _DEBUG
 	}
 }
@@ -91,7 +96,7 @@ void GameObject::scale(const glm::vec2 & _scale) {
 	m_scaleAmount = _scale;
 }
 
-const glm::vec2 & GameObject::getSize() {
+const glm::vec2 GameObject::getSize() {
 	return m_size * m_scaleAmount;
 }
 
@@ -115,7 +120,7 @@ void GameObject::setGraph(Graph2D * graph) {
 	m_graph = graph;
 }
 
-Graph2D * Player::getGraph() {
+Graph2D * GameObject::getGraph() {
 	return m_graph;
 }
 
@@ -128,17 +133,23 @@ void GameObject::setDraw(bool flag) {
 bool GameObject::isDrawn() {
 	return m_drawn;
 }
-void GameObject::setBehaviour(std::shared_ptr<Behaviour> behaviour) {
-	if (m_behaviour)
-		m_behaviour->exitActions();
+void GameObject::addBehaviour(std::shared_ptr<Behaviour> behaviour) {
+	if (behaviour)
+		behaviour->entryActions();
 
-	m_behaviour = behaviour;
-	if (m_behaviour)
-		m_behaviour->entryActions();
+	m_behaviours[behaviour->getID()] = behaviour;
 }
-Behaviour * GameObject::getBehaviour() {
-	return m_behaviour.get();
+
+void GameObject::removeBehaviour(std::shared_ptr<Behaviour> behaviour) {
+	auto iter = m_behaviours.find(behaviour->getID());
+	if (iter != m_behaviours.end())
+		m_behaviours.erase(iter);
 }
+
+std::unordered_map<unsigned int, std::shared_ptr<Behaviour>> GameObject::getBehaviours() {
+	return m_behaviours;
+}
+
 void GameObject::setRotation(float angle) {
 	m_rotation = angle;
 }
