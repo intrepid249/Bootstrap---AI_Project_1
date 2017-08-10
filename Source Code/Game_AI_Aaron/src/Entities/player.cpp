@@ -1,5 +1,6 @@
 #include "Entities\Player.h"
 
+#include "Behaviours\BehaviourController.h"
 #include "Behaviours\BKeyboardControlled.h"
 #include "Behaviours\BSeek.h"
 #include "Behaviours\BFollowPath.h"
@@ -22,6 +23,7 @@
 Player::Player(aie::Texture *tex) : GameObject(tex) {
 	setFriction(1);
 
+
 	m_keyboardBehaviour = std::shared_ptr<BKeyboardControlled>(new BKeyboardControlled());
 	m_keyboardBehaviour->setParent(this);
 	m_keyboardBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
@@ -31,30 +33,31 @@ Player::Player(aie::Texture *tex) : GameObject(tex) {
 	m_seekBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 	m_seekBehaviour->setInnerRadius(20);
 	m_seekBehaviour->setOuterRadius(200);
-	m_seekBehaviour->setPriorityWeight(0.2);
-	//m_seekBehaviour->onInnerRadiusEnter([this]() {
-	//	setBehaviour(m_keyboardBehaviour);
-	//});
+	m_seekBehaviour->setPriorityWeight(2.f);
+	m_seekBehaviour->onInnerRadiusEnter([this]() {
+		m_behaviourController->removeBehaviour(m_seekBehaviour);
+	});
 
 	m_fleeBehaviour = std::shared_ptr<BSeek>(new BSeek());
 	m_fleeBehaviour->setParent(this);
 	m_fleeBehaviour->setStrength(-PLAYER_MOVEMENT_SPEED);
 	m_fleeBehaviour->setOuterRadius(200);
-	//m_fleeBehaviour->onOuterRadiusExit([this]() {
-	//	setBehaviour(m_keyboardBehaviour);
-	//});
+	m_fleeBehaviour->onOuterRadiusExit([this]() {
+		m_behaviourController->removeBehaviour(m_fleeBehaviour);
+	});
 
 	m_path = std::unique_ptr<Path>(new Path());
 	m_followPathBehaviour = std::shared_ptr<BFollowPath>(new BFollowPath());
 	m_followPathBehaviour->setParent(this);
 	m_followPathBehaviour->setPath(m_path.get());
 	m_followPathBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
-	m_followPathBehaviour->setNodeRadius(20);
+	m_followPathBehaviour->setNodeRadius(40);
+	m_followPathBehaviour->setPriorityWeight(2);
 	m_followPathBehaviour->onLastNodeReached([this]() {
 		if (m_followPathBehaviour->isPatrolling())
 			m_followPathBehaviour->setPatrolDir(m_followPathBehaviour->getPatrolDir() * -1);
-		else;
-			//setBehaviour(m_keyboardBehaviour);
+		else
+			m_behaviourController->removeBehaviour(m_followPathBehaviour);
 	});
 
 	m_wanderBehavour = std::shared_ptr<BWander>(new BWander());
@@ -64,7 +67,7 @@ Player::Player(aie::Texture *tex) : GameObject(tex) {
 	m_wanderBehavour->setRadius(100);
 	m_wanderBehavour->setPriorityWeight(1);
 
-	addBehaviour(m_wanderBehavour);
+	m_behaviourController->addBehaviour(m_wanderBehavour);
 }
 
 Player::~Player() {
@@ -81,11 +84,11 @@ void Player::update(float deltaTime) {
 		if (ImGui::Checkbox("Patrolling", &patrolFlag))
 			m_followPathBehaviour->isPatrolling(patrolFlag);
 
-		//static bool wanderFlag = false;
-		//if (ImGui::Checkbox("Wander", &wanderFlag))
-		//	setBehaviour(m_wanderBehavour);
-		//if (!wanderFlag)
-		//	setBehaviour(m_keyboardBehaviour);
+		static bool wanderFlag = false;
+		if (ImGui::Checkbox("Wander", &wanderFlag))
+			m_behaviourController->addBehaviour(m_wanderBehavour);
+		if (!wanderFlag)
+			m_behaviourController->removeBehaviour(m_wanderBehavour);
 
 
 		// Add a tree
@@ -104,19 +107,26 @@ void Player::update(float deltaTime) {
 
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL)) {
 		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT)) {
-			m_seekBehaviour->setTarget(m_mousePos);
-			addBehaviour(m_seekBehaviour);
+			std::shared_ptr<BSeek> seek = std::shared_ptr<BSeek>(new BSeek());
+			seek->setParent(this);
+			seek->setStrength(PLAYER_MOVEMENT_SPEED);
+			seek->setInnerRadius(20);
+			seek->setOuterRadius(200);
+			seek->setPriorityWeight(2.f);
+			seek->onInnerRadiusEnter([this, seek]() {
+				m_behaviourController->removeBehaviour(seek);
+			});
+			seek->setTarget(m_mousePos);
+			m_behaviourController->addBehaviour(seek);
 		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_RIGHT)) {
 			m_fleeBehaviour->setTarget(m_mousePos);
-			addBehaviour(m_fleeBehaviour);
-		} /*else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
-			if (getBehaviour() != m_followPathBehaviour.get()) {
-				setBehaviour(m_followPathBehaviour);
-				m_path->clear();
-			}
+			m_behaviourController->addBehaviour(m_fleeBehaviour);
+		} else if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_MIDDLE)) {
+			m_behaviourController->addBehaviour(m_followPathBehaviour);
 
 			m_path->addPathSegment(m_mousePos);
-		}*/
+		} else if (input->wasKeyPressed(aie::INPUT_KEY_R))
+			m_path->clear();
 	}
 
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT)) {

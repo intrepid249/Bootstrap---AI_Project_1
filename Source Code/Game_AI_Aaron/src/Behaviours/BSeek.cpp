@@ -57,7 +57,7 @@ void BSeek::debugRender(aie::Renderer2D * renderer) {
 #ifdef _DEBUG
 	renderer->drawBox(m_targetPos.x, m_targetPos.y, 4, 4);
 
-	renderer->setRenderColour(1.0f, 1.0f, 1.0f, 0.5f);
+	renderer->setRenderColour(1.0f, 1.0f, 1.0f, 0.2f);
 	renderer->drawCircle(m_targetPos.x, m_targetPos.y, m_innerRadius);
 	renderer->drawCircle(m_targetPos.x, m_targetPos.y, m_outerRadius);
 	renderer->setRenderColour(1, 1, 1, 1);

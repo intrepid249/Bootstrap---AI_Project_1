@@ -10,6 +10,7 @@ typedef INI<> ini_t;
 #include "Graph\Graph2D.h"
 
 class Behaviour;
+class BehaviourController;
 
 class Path;
 class Pathfinder;
@@ -75,28 +76,24 @@ public:
 	/** Gets the current display status of the object*/
 	bool isDrawn();
 
-	/** Add a behaviour to the collection*/
-	void addBehaviour(std::shared_ptr<Behaviour> behaviour);
-	/** Remove a specified behaviour*/
-	void removeBehaviour(std::shared_ptr<Behaviour> behaviour);
-	/** Get currently active behaviours*/
-	std::unordered_map<unsigned int, std::shared_ptr<Behaviour>> getBehaviours();
-
 	/** Set the angle of rotation applied to the sprite image and other rotation calculations*/
 	void setRotation(float angle);
 	/** Get the angle of rotation applied to the sprite image and other rotation calculations*/
 	float getRotation();
+
+	/** Get the BehaviourController*/
+	const std::shared_ptr<BehaviourController> &getBehaviourController();
 
 #pragma endregion
 	/** Perform collision checking and reaction updates*/
 	void checkCollisions(const std::vector<jm::Object> &objList);
 
 	/** When object exits one edge of the screen, move them to the opposite edge*/
-	void wrapScreenBounds();
+	void wrapScreenBounds(glm::vec2 cameraPos = glm::vec2(0));
 	/** When the object hits the edge of the window, bounce off and change direction*/
 	void constrainToScreenBounds(bool bounce, glm::vec2 cameraPos = glm::vec2(0));
 	/** Flag the object for unuse when it exits screen boundaries*/
-	void destroyOnExitScreen();
+	void destroyOnExitScreen(glm::vec2 cameraPos = glm::vec2(0));
 
 protected:
 	glm::vec2 m_pos, m_size, m_velocity, m_acceleration, m_scaleAmount;
@@ -113,7 +110,7 @@ protected:
 	std::unique_ptr<Pathfinder> m_pathfinder;
 
 	std::vector<std::shared_ptr<JM_Component>> m_components;
-	std::unordered_map<unsigned int, std::shared_ptr<Behaviour>> m_behaviours;
+	std::shared_ptr<BehaviourController> m_behaviourController;
 
 	// Used to compound the force when 'Bouncing' off objects
 	const float REFLECTION_FORCE = 250;

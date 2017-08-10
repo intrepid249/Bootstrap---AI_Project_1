@@ -25,7 +25,24 @@ Graph2D * Pathfinder::getGraph() {
 }
 
 void Pathfinder::findPath(Graph2D::Node * startNode, std::function<bool(Graph2D::Node*)> isGoalNodeCallback) {
+	algorithm = DIJKSTRA;
+
 	m_isGoalNode = isGoalNodeCallback;
+
+	Node *node = new Node();
+	node->node = startNode;
+	node->gScore = 0;
+	node->parent = nullptr;
+
+	m_open.push_back(node);
+
+	m_pathFound = false;
+}
+
+void Pathfinder::findPath(Graph2D::Node * startNode, Graph2D::Node *endNode, std::function<float()> calcHeuristic) {
+	algorithm = ASTAR;
+
+	m_calcHeuristic = calcHeuristic;
 
 	Node *node = new Node();
 	node->node = startNode;
@@ -65,6 +82,9 @@ void Pathfinder::updateSearch() {
 			int cost = edge.data;
 			float gScore = node->gScore + cost;
 
+			if (algorithm == ASTAR && m_calcHeuristic)
+				gScore += m_calcHeuristic();
+
 			Node *nodeInList = getNodeInList(m_open, child);
 			if (nodeInList == nullptr)
 				nodeInList = getNodeInList(m_closed, child);
@@ -92,6 +112,10 @@ void Pathfinder::updateSearch() {
 
 Path & Pathfinder::getPath() {
 	return m_path;
+}
+
+const int Pathfinder::getAlgorithm() {
+	return algorithm;
 }
 
 Pathfinder::Node * Pathfinder::getNodeInList(std::list<Node*> list, Graph2D::Node * node) {

@@ -3,6 +3,7 @@
 #include "GlobalConfig.h"
 #include "Components\JM_Component.h"
 #include "Behaviours\Behaviour.h"
+#include "Behaviours\BehaviourController.h"
 #include "Tileset.h"
 
 #include "Graph\Path.h"
@@ -14,6 +15,9 @@
 
 GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)),
 m_size(glm::vec2(tex->getWidth(), tex->getHeight())), m_startNode(nullptr), m_endNode(nullptr) {
+
+	m_behaviourController = std::shared_ptr<BehaviourController>(new BehaviourController());
+
 }
 
 GameObject::~GameObject() {
@@ -33,9 +37,7 @@ void GameObject::update(float deltaTime) {
 			m_components[i]->update(deltaTime);
 
 		// Update all behaviours
-		for (auto iter = m_behaviours.begin(); iter != m_behaviours.end(); iter++)
-			if ((*iter).second != nullptr)
-				(*iter).second->doActions(deltaTime);
+		m_behaviourController->update(deltaTime);
 	}
 }
 
@@ -68,9 +70,7 @@ void GameObject::render(aie::Renderer2D * renderer, float depth) {
 			m_components[i]->render(renderer);
 
 		// Perform debug rendering (if any) for all behaviours
-		for (auto iter = m_behaviours.begin(); iter != m_behaviours.end(); iter++)
-			if ((*iter).second != nullptr)
-				(*iter).second->debugRender(renderer);
+		m_behaviourController->render(renderer);
 #endif // _DEBUG
 	}
 }
@@ -133,28 +133,15 @@ void GameObject::setDraw(bool flag) {
 bool GameObject::isDrawn() {
 	return m_drawn;
 }
-void GameObject::addBehaviour(std::shared_ptr<Behaviour> behaviour) {
-	if (behaviour)
-		behaviour->entryActions();
-
-	m_behaviours[behaviour->getID()] = behaviour;
-}
-
-void GameObject::removeBehaviour(std::shared_ptr<Behaviour> behaviour) {
-	auto iter = m_behaviours.find(behaviour->getID());
-	if (iter != m_behaviours.end())
-		m_behaviours.erase(iter);
-}
-
-std::unordered_map<unsigned int, std::shared_ptr<Behaviour>> GameObject::getBehaviours() {
-	return m_behaviours;
-}
 
 void GameObject::setRotation(float angle) {
 	m_rotation = angle;
 }
 float GameObject::getRotation() {
 	return m_rotation;
+}
+const std::shared_ptr<BehaviourController>& GameObject::getBehaviourController() {
+	return m_behaviourController;
 }
 #pragma endregion
 
@@ -180,11 +167,14 @@ void GameObject::checkCollisions(const std::vector<jm::Object>& objList) {
 	}
 }
 
-void GameObject::wrapScreenBounds() {
+void GameObject::wrapScreenBounds(glm::vec2 cameraPos = glm::vec2(0)) {
 	ini_t *cfg = GlobalConfig::getInstance();
 	int winWidth = cfg->get("DisplayOptions", "WindowWidth", 1);
 	int winHeight = cfg->get("DisplayOptions", "WindowHeight", 1);
+	float width = (m_tex != nullptr) ? getSize().x : 0;
+	float height = (m_tex != nullptr) ? getSize().x : 0;
 
+	// TODO: Adjust for camera movement
 	if (m_pos.x < 0) setPos(glm::vec2(winWidth, m_pos.y));
 	if (m_pos.x > winWidth) setPos(glm::vec2(0, m_pos.y));
 	if (m_pos.y < 0) setPos(glm::vec2(winHeight, m_pos.x));
@@ -218,6 +208,6 @@ void GameObject::constrainToScreenBounds(bool bounce, glm::vec2 cameraPos) {
 	}
 }
 
-void GameObject::destroyOnExitScreen() {
+void GameObject::destroyOnExitScreen(glm::vec2 cameraPos = glm::vec2(0)) {
 }
 #pragma endregion

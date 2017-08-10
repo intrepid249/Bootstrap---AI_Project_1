@@ -3,6 +3,8 @@
 #include <glm\vec2.hpp>
 #include "Entities\GameObject.h"
 
+#include "BehaviourController.h"
+
 namespace aie {
 	class Renderer2D;
 }
@@ -37,7 +39,7 @@ public:
 	float getForceScale() {
 		// Handle automatic weighted steering behaviours
 		float sumPriorityWeight = 0;
-		for (auto behaviour : m_parentObject->getBehaviours()) {
+		for (auto behaviour : m_parentObject->getBehaviourController()->getBehaviours()) {
 			sumPriorityWeight += behaviour.second->getPriorityWeight();
 		}
 		float forceScale = m_priorityWeight / sumPriorityWeight;

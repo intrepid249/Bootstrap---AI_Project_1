@@ -91,6 +91,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Behaviours\BehaviourController.cpp" />
     <ClCompile Include="src\Behaviours\BFollowPath.cpp" />
     <ClCompile Include="src\Behaviours\BKeyboardControlled.cpp" />
     <ClCompile Include="src\Behaviours\BSeek.cpp" />
@@ -114,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Behaviours\Behaviour.h" />
+    <ClInclude Include="inc\Behaviours\BehaviourController.h" />
     <ClInclude Include="inc\Behaviours\BFollowPath.h" />
     <ClInclude Include="inc\Behaviours\BKeyboardControlled.h" />
     <ClInclude Include="inc\Behaviours\BSeek.h" />

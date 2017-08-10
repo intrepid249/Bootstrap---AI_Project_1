@@ -264,6 +264,7 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	ImGui::Text("Hold LeftCtrl to interact with player's behaviours");
 	ImGui::BulletText("Left Mouse Button: Seek toward a point");
 	ImGui::BulletText("Middle Mouse Button: Add a node to a path for the player to follow");
+	ImGui::BulletText("R: Clear all nodes from the player's follow path");
 	ImGui::BulletText("Right Mouse Button: Add a point for the player to flee from");
 	ImGui::Text("Hold LeftAlt to edit the graph");
 	ImGui::BulletText("Left Mouse Button: Add a node to the graph");
