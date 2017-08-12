@@ -78,6 +78,9 @@
     <ClCompile Include="src\Behaviours\BehaviourController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Behaviours\BCollisionAvoidance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="inc\Game_AI_AaronApp.h">
@@ -153,6 +156,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="inc\Behaviours\BehaviourController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Behaviours\BCollisionAvoidance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

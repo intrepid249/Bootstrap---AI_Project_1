@@ -152,7 +152,7 @@ void Player::update(float deltaTime) {
 						return n == m_endNode;
 					});
 				} else if (m_algorithm == "astar") {
-
+					m_pathfinder->findPath(m_startNode, m_endNode, [this]() { return glm::length(m_startNode->data - m_endNode->data); });
 				}
 
 				while (!m_pathfinder->pathFound()) {
@@ -166,7 +166,7 @@ void Player::update(float deltaTime) {
 					m_path->addPathSegment((*iter));
 				}
 
-				//setBehaviour(m_followPathBehaviour);
+				m_behaviourController->addBehaviour(m_followPathBehaviour);
 			}
 		}
 
@@ -185,22 +185,6 @@ void Player::update(float deltaTime) {
 
 void Player::render(aie::Renderer2D * renderer) {
 	GameObject::render(renderer);
-
-	//char buffer[64];
-	//if (m_behaviour == m_keyboardBehaviour)
-	//	sprintf_s(buffer, "Keyboard");
-	//else if (m_behaviour == m_seekBehaviour)
-	//	sprintf_s(buffer, "Seek");
-	//else if (m_behaviour == m_fleeBehaviour)
-	//	sprintf_s(buffer, "Flee");
-	//else if (m_behaviour == m_followPathBehaviour)
-	//	sprintf_s(buffer, "Follow Path");
-	//else if (m_behaviour == m_wanderBehavour)
-	//	sprintf_s(buffer, "Wander");
-	//else
-	//	sprintf_s(buffer, "Behaviour unknown");
-
-	//renderer->drawText(ResourceManager::getFonts()["default"].get(), buffer, 10, 10);
 }
 
 void Player::setMousePos(const glm::vec2 &mousePos) {

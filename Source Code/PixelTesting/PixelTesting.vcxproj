@@ -14,7 +14,7 @@
     <ProjectGuid>{62F4DED9-DC3C-41E9-A857-451892CBE4F7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PixelTesting</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

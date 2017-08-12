@@ -46,6 +46,7 @@ protected:
 	std::function<float()> m_calcHeuristic;
 	bool m_pathFound;
 	Path m_path;
+	Graph2D::Node *m_goalNode;		// Used for Astar to calculate a path
 
 	std::list<Node *> m_open, m_closed;
 

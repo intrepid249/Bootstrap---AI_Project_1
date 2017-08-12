@@ -41,6 +41,7 @@ void Pathfinder::findPath(Graph2D::Node * startNode, std::function<bool(Graph2D:
 
 void Pathfinder::findPath(Graph2D::Node * startNode, Graph2D::Node *endNode, std::function<float()> calcHeuristic) {
 	algorithm = ASTAR;
+	m_goalNode = endNode;
 
 	m_calcHeuristic = calcHeuristic;
 
@@ -72,6 +73,12 @@ void Pathfinder::updateSearch() {
 			
 			m_pathFound = true;
 			return;
+		} else if (algorithm == ASTAR && node->node == m_goalNode) {
+			calculatePath(node);
+
+			m_pathFound = true;
+			return;
+
 		}
 
 		auto edges = node->node->edges;

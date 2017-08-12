@@ -167,7 +167,7 @@ void GameObject::checkCollisions(const std::vector<jm::Object>& objList) {
 	}
 }
 
-void GameObject::wrapScreenBounds(glm::vec2 cameraPos = glm::vec2(0)) {
+void GameObject::wrapScreenBounds(glm::vec2 cameraPos) {
 	ini_t *cfg = GlobalConfig::getInstance();
 	int winWidth = cfg->get("DisplayOptions", "WindowWidth", 1);
 	int winHeight = cfg->get("DisplayOptions", "WindowHeight", 1);
@@ -208,6 +208,6 @@ void GameObject::constrainToScreenBounds(bool bounce, glm::vec2 cameraPos) {
 	}
 }
 
-void GameObject::destroyOnExitScreen(glm::vec2 cameraPos = glm::vec2(0)) {
+void GameObject::destroyOnExitScreen(glm::vec2 cameraPos) {
 }
 #pragma endregion
