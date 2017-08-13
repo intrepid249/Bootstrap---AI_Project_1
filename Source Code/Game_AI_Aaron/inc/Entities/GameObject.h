@@ -9,6 +9,8 @@ typedef INI<> ini_t;
 
 #include "Graph\Graph2D.h"
 
+class Game_AI_AaronApp;
+
 class Behaviour;
 class BehaviourController;
 
@@ -16,17 +18,17 @@ class Path;
 class Pathfinder;
 
 class JM_Component;
+namespace jm {
+	struct Rect;
+}
 namespace aie {
 	class Renderer2D;
 	class Texture;
 };
-namespace jm {
-	struct Object;
-}
 
 class GameObject {
 public:
-	GameObject(aie::Texture *tex = nullptr);
+	GameObject(aie::Texture *tex = nullptr, Game_AI_AaronApp *app = nullptr);
 	virtual ~GameObject();
 
 	/** Perform logic to update values each frame*/
@@ -86,7 +88,7 @@ public:
 
 #pragma endregion
 	/** Perform collision checking and reaction updates*/
-	void checkCollisions(const std::vector<jm::Object> &objList);
+	void checkCollisions(const std::vector<jm::Rect> &objList);
 
 	/** When object exits one edge of the screen, move them to the opposite edge*/
 	void wrapScreenBounds(glm::vec2 cameraPos = glm::vec2(0));
@@ -114,6 +116,8 @@ protected:
 
 	// Used to compound the force when 'Bouncing' off objects
 	const float REFLECTION_FORCE = 250;
+
+	Game_AI_AaronApp *m_app;
 
 private:
 };

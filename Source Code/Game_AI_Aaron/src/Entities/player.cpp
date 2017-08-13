@@ -1,10 +1,14 @@
 #include "Entities\Player.h"
+#include "Game_AI_AaronApp.h"
 
 #include "Behaviours\BehaviourController.h"
 #include "Behaviours\BKeyboardControlled.h"
 #include "Behaviours\BSeek.h"
 #include "Behaviours\BFollowPath.h"
 #include "Behaviours\BWander.h"
+#include "Behaviours\BCollisionAvoidance.h"
+
+#include "Entities\Enemies\Enemy.h"
 
 #include "Graph\Path.h"
 #include "Pathfinding\Pathfinder.h"
@@ -17,10 +21,11 @@
 #include <Renderer2D.h>
 
 #include <imgui.h>
+#include <jm_utilities.h>
 
 #include <iostream>
 
-Player::Player(aie::Texture *tex) : GameObject(tex) {
+Player::Player(aie::Texture *tex, Game_AI_AaronApp *app) : GameObject(tex, app) {
 	setFriction(1);
 
 
@@ -33,17 +38,8 @@ Player::Player(aie::Texture *tex) : GameObject(tex) {
 	m_seekBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 	m_seekBehaviour->setInnerRadius(20);
 	m_seekBehaviour->setOuterRadius(200);
-	m_seekBehaviour->setPriorityWeight(2.f);
 	m_seekBehaviour->onInnerRadiusEnter([this]() {
 		m_behaviourController->removeBehaviour(m_seekBehaviour);
-	});
-
-	m_fleeBehaviour = std::shared_ptr<BSeek>(new BSeek());
-	m_fleeBehaviour->setParent(this);
-	m_fleeBehaviour->setStrength(-PLAYER_MOVEMENT_SPEED);
-	m_fleeBehaviour->setOuterRadius(200);
-	m_fleeBehaviour->onOuterRadiusExit([this]() {
-		m_behaviourController->removeBehaviour(m_fleeBehaviour);
 	});
 
 	m_path = std::unique_ptr<Path>(new Path());
@@ -52,7 +48,6 @@ Player::Player(aie::Texture *tex) : GameObject(tex) {
 	m_followPathBehaviour->setPath(m_path.get());
 	m_followPathBehaviour->setStrength(PLAYER_MOVEMENT_SPEED);
 	m_followPathBehaviour->setNodeRadius(40);
-	m_followPathBehaviour->setPriorityWeight(2);
 	m_followPathBehaviour->onLastNodeReached([this]() {
 		if (m_followPathBehaviour->isPatrolling())
 			m_followPathBehaviour->setPatrolDir(m_followPathBehaviour->getPatrolDir() * -1);
@@ -65,9 +60,25 @@ Player::Player(aie::Texture *tex) : GameObject(tex) {
 	m_wanderBehavour->setStrength(1);
 	m_wanderBehavour->setProjectionDistance(50);
 	m_wanderBehavour->setRadius(100);
-	m_wanderBehavour->setPriorityWeight(1);
+	m_wanderBehavour->setPriorityWeight(0.5f);
 
-	m_behaviourController->addBehaviour(m_wanderBehavour);
+	m_fleeBehaviour = std::shared_ptr<BSeek>(new BSeek());
+	m_fleeBehaviour->setParent(this);
+	m_fleeBehaviour->setStrength(-PLAYER_MOVEMENT_SPEED);
+	m_fleeBehaviour->setInnerRadius(150);
+	m_fleeBehaviour->setOuterRadius(400);
+	m_fleeBehaviour->onOuterRadiusExit([this]() {
+		m_behaviourController->removeBehaviour(m_fleeBehaviour);
+	});
+
+	m_collisionAvoidance = std::shared_ptr<BCollisionAvoidance>(new BCollisionAvoidance());
+	m_collisionAvoidance->setParent(this);
+	m_collisionAvoidance->setVisionDistance(200);
+	m_collisionAvoidance->setFOV(jm::degToRad(20.f));
+	m_collisionAvoidance->setStrength(PLAYER_MOVEMENT_SPEED);
+	m_collisionAvoidance->setCollidableObjects(m_app->getColliders());
+
+	//m_behaviourController->addBehaviour(m_collisionAvoidance);
 }
 
 Player::~Player() {
@@ -176,11 +187,16 @@ void Player::update(float deltaTime) {
 		}
 	}
 
-	//if (getBehaviour() != m_keyboardBehaviour.get() && !input->getPressedKeys().empty() &&
-	//	!(input->isKeyDown(aie::INPUT_KEY_LEFT_CONTROL) || input->isKeyDown(aie::INPUT_KEY_LEFT_ALT) 
-	//		|| input->isKeyDown(aie::INPUT_KEY_LEFT_SHIFT) || input->isKeyDown(aie::INPUT_KEY_ENTER))) {
-	//	setBehaviour(m_keyboardBehaviour);
-	//}
+	for (auto iter = m_app->getEnemies().begin(); iter != m_app->getEnemies().end(); iter++) {
+		auto enemy = (*iter);
+		float dist = glm::length(enemy->getPos() - m_pos);
+
+		if (dist < m_fleeBehaviour->getInnerRadius()) {
+			m_fleeBehaviour->setTarget(enemy->getPos());
+			m_fleeBehaviour->setPriorityWeight((1 / dist - 0.5f) * 2);
+			m_behaviourController->addBehaviour(m_fleeBehaviour);
+		}
+	}
 }
 
 void Player::render(aie::Renderer2D * renderer) {

@@ -18,9 +18,15 @@
     <ClInclude Include="jm_utils\inc\jm_utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="jm_utils\inc\jm_shapes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\jm_utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\jm_shapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

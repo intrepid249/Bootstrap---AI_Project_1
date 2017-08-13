@@ -61,7 +61,7 @@ protected:
 	
 	float m_strength = 0;
 
-	float m_priorityWeight; // Amount to scale the force affecting the entity by
+	float m_priorityWeight = 0; // Amount to scale the force affecting the entity by
 
 private:
 	static unsigned int ms_nextID;

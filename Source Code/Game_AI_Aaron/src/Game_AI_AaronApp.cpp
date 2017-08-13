@@ -17,11 +17,13 @@
 #include <iostream>
 
 #include <jm_utilities.h>
+#include <jm_shapes.h>
 
 #include "GlobalConfig.h"
 #include "Entities\GameObject.h"
 #include "Entities\Player.h"
 #include "Entities\HomeBase.h"
+#include "Entities\Enemies\Enemy.h"
 
 #include "Graph\Graph2D.h"
 
@@ -43,128 +45,7 @@ bool Game_AI_AaronApp::startup() {
 	INI<> *ini = GlobalConfig::getInstance();
 
 	/// Map Information
-#pragma region Tiled Map Data
-	pugi::xml_parse_result result = m_mapData.load_file("./maps/map1.tmx");
-	if (result) {
-		// Store the map attributes as member variables
-		pugi::xml_node map = m_mapData.child("map");
-		m_mapWidth = map.attribute("width").as_int();
-		m_mapHeight = map.attribute("height").as_int();
-		m_tileWidth = map.attribute("tilewidth").as_int();
-		m_tileHeight = map.attribute("tileheight").as_int();
-
-		// Iterate through each of the tilesets and store their information for later use
-		int tilesetCount = 0;
-		for (auto iter = map.children("tileset").begin(); iter != map.children("tileset").end(); iter++) {
-			pugi::xml_document tilesetData;
-			std::string filepath = "./maps/";
-			tilesetData.load_file((filepath + (*iter).attribute("source").value()).c_str());
-			pugi::xml_node tilesetDataNode = tilesetData.child("tileset");
-			size_t imageWidth = tilesetDataNode.child("image").attribute("width").as_int();
-			size_t imageHeight = tilesetDataNode.child("image").attribute("height").as_int();
-			size_t firstGid = (*iter).attribute("firstgid").as_int();
-			std::string name = tilesetDataNode.attribute("name").as_string();
-			size_t tileWidth = tilesetDataNode.attribute("tilewidth").as_int();
-			size_t tileHeight = tilesetDataNode.attribute("tileheight").as_int();
-			size_t tileCount = tilesetDataNode.attribute("tilecount").as_int();
-			size_t columns = tilesetDataNode.attribute("columns").as_int();
-
-			// Load the image file for each tilset
-			std::string imagePath = tilesetDataNode.child("image").attribute("source").as_string();
-			//std::cout << "Image source " << imagePath << "\n";
-			m_tilesetImageNames.push_back(name);
-			ResourceManager::getTextures()[m_tilesetImageNames[tilesetCount].c_str()] = std::shared_ptr<aie::Texture>(
-				new aie::Texture(imagePath.replace(imagePath.begin(), imagePath.begin() + 1, "").c_str()));
-
-			jm::Tileset ts = jm::Tileset(firstGid, name, tileWidth, tileHeight, tileCount, columns, imageWidth, imageHeight);
-			m_tilesets.push_back(std::move(ts));
-			tilesetCount++;
-		}
-
-		auto objectList = map.child("objectgroup");
-		for (auto iter = objectList.children("object").begin(); iter != objectList.children("object").end(); iter++) {
-			float cx = (*iter).attribute("x").as_float();
-			float cy = (*iter).attribute("y").as_float();
-			float width = (*iter).attribute("width").as_float();
-			float height = (*iter).attribute("height").as_float();
-			jm::Object collider(cx, cy, width, height);
-			m_collisionTiles.push_back(collider);
-		}
-
-
-		// Iterate through each tile layer to store gid information
-		for (auto iter = map.children("layer").begin(); iter != map.children("layer").end(); iter++) {
-			// GID data is stored in CSV format
-			std::string rawText = (*iter).child("data").text().as_string();
-			std::vector<std::string> gidData;
-			jm::stringSplit(rawText, ',', gidData);
-
-			// Store the tile gid data
-			jm::TileLayer tl((*iter).attribute("name").value(), (*iter).attribute("width").as_int(), (*iter).attribute("height").as_int());
-			tl.layerData = gidData;
-
-			m_tileGid_Layers.push_back(tl);
-		}
-
-		// Iterate through each tile layer to store tile information
-		int currentTilesetIndex = 0;
-		size_t layerIndex = 0;
-		for (auto iter = map.children("layer").begin(); iter != map.children("layer").end(); iter++) {
-			// Iterate through the gid list and store tile information
-			auto currentLayer = m_tileGid_Layers[layerIndex];
-			std::string layerName = (*iter).attribute("name").as_string();
-
-			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData.size(); tileIndex++) {
-				//std::cout << currentLayer.layerData[tileIndex] << ", ";
-				int tempGid = std::stoi(currentLayer.layerData[tileIndex]); // For some reason all the layer data for "top" layer is 0
-
-				// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
-				if (currentTilesetIndex >= 0 && tempGid > m_tilesets[currentTilesetIndex].tileCount) {
-					tempGid -= (currentTilesetIndex == 0) ? m_tilesets[currentTilesetIndex].tileCount : m_tilesets[currentTilesetIndex - 1].tileCount;
-					if ((unsigned int)currentTilesetIndex + 1 < m_tilesets.size())
-						currentTilesetIndex++;
-				} else if (currentTilesetIndex > 0 && tempGid != 0 && tempGid < m_tilesets[currentTilesetIndex].firstGID)
-					currentTilesetIndex--;
-
-				jm::Tile t;
-				t.gid = tempGid - 1;
-				if (tempGid != 0)
-					t.image = ResourceManager::getTextures()[m_tilesetImageNames[currentTilesetIndex].c_str()].get();
-				else
-					t.image = nullptr;
-
-				t.width = (float)m_tilesets[currentTilesetIndex].tileWidth;
-				t.height = (float)m_tilesets[currentTilesetIndex].tileHeight;
-				// Calculate uv coordinates needed for accessing the individual tile image
-				t.uv_y = (t.gid == 0) ? 0 : ((t.gid % m_tilesets[currentTilesetIndex].columns) == 0) ? (t.gid / m_tilesets[currentTilesetIndex].columns)
-					: (int)ceil(t.gid / (double)m_tilesets[currentTilesetIndex].columns) - 1;
-				t.uv_x = t.gid - (m_tilesets[currentTilesetIndex].columns * t.uv_y);
-
-				// Set the rendering depth according to the tileset layer
-				std::transform(currentLayer.name.begin(), currentLayer.name.end(), currentLayer.name.begin(), ::tolower);
-				if (currentLayer.name == "background")
-					t.layerDepth = 20;
-				else if (currentLayer.name == "foreground")
-					t.layerDepth = -1;
-				else
-					t.layerDepth = -1;
-
-				m_backgroundTiles[layerName].push_back(t);
-			}
-			layerIndex++;
-		}
-	} else {
-#if 0
-		// TODO: Memory leaks from this part of the code??
-		wchar_t *errorText = new wchar_t[4096];
-		MultiByteToWideChar(CP_ACP, 0, result.description(), -1, errorText, 4096);
-		MessageBox(NULL, errorText, L"Error reading map information", MB_OK | MB_ICONERROR);
-		delete[] errorText;
-#endif
-
-		std::cout << "Problem reading map information:\n" << result.description() << "\n";
-	}
-#pragma endregion
+	loadTilesetData();
 
 	/// Graph
 	// Read configuration settings
@@ -188,6 +69,8 @@ bool Game_AI_AaronApp::startup() {
 	ResourceManager::getTextures()["appIcon"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/Endless/appIcon.png"));
 	ResourceManager::getTextures()["player"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/Endless/player_handgun.png"));
 	ResourceManager::getTextures()["homeBase"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/Endless/homeBase.png"));
+	ResourceManager::getTextures()["enemy1"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/Endless/squad1.png"));
+	ResourceManager::getTextures()["enemy2"] = std::shared_ptr<aie::Texture>(new aie::Texture("./textures/Endless/squad2.png"));
 	// Fonts
 	ResourceManager::getFonts()["default"] = std::shared_ptr<aie::Font>(new aie::Font("./font/consolas.ttf", 32));
 
@@ -198,10 +81,18 @@ bool Game_AI_AaronApp::startup() {
 	base->scale(1.3f);
 	m_baseList.push_back(std::move(base));
 	// Player
-	m_player = std::unique_ptr<Player>(new Player(ResourceManager::getTextures()["player"].get()));
+	m_player = std::shared_ptr<Player>(new Player(ResourceManager::getTextures()["player"].get(), this));
 	m_player->setPos(glm::vec2(getWindowWidth() * 0.5f, getWindowHeight() * 0.5f));
 	m_player->scale(0.2f);
 	m_player->setGraph(m_graph.get());
+	// Enemies
+	for (int i = 0; i < 10; i++) {
+		std::shared_ptr<Enemy> en = std::shared_ptr<Enemy>(new Enemy(ResourceManager::getTextures()["enemy1"].get(), this));
+		en->setPos(glm::vec2(50 + i * en->getSize().x, 50 + i * en->getSize().y));
+		en->scale(0.2f);
+		en->setGraph(m_graph.get());
+		m_enemies.push_back(en);
+	}
 
 
 	// Change the window icon
@@ -233,6 +124,9 @@ void Game_AI_AaronApp::update(float deltaTime) {
 
 	ImGui::SetWindowPos(ImVec2(0, 0));
 	ImGui::SetWindowSize(ImVec2(-1, 250));
+
+	ImGui::Checkbox("Show collision boxes", &m_showColliders);
+	ImGui::Separator();
 
 	if (ImGui::CollapsingHeader("Player")) {
 		ini->select("Player");
@@ -282,8 +176,8 @@ void Game_AI_AaronApp::update(float deltaTime) {
 		static int spacing = 50;
 		static int xOffset = 50, yOffset = 50;
 
-		ImGui::SliderInt("Rows", &rows, 2, (int)((windowSize.y) / spacing));
-		ImGui::SliderInt("Cols", &cols, 2, (int)((windowSize.x - xOffset) / spacing));
+		ImGui::SliderInt("Rows", &rows, 2, (int)((m_mapHeight * m_tileHeight) / spacing));
+		ImGui::SliderInt("Cols", &cols, 2, (int)((m_mapWidth * m_tileWidth) / spacing));
 
 		ImGui::Separator();
 
@@ -392,6 +286,10 @@ void Game_AI_AaronApp::update(float deltaTime) {
 	m_player->setMousePos(m_mousePos);
 #pragma endregion
 
+	for (auto iter = m_enemies.begin(); iter != m_enemies.end(); iter++) {
+		(*iter)->update(deltaTime);
+	}
+
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
@@ -405,12 +303,25 @@ void Game_AI_AaronApp::draw() {
 	// begin drawing sprites
 	m_renderer->begin();
 
+	char buffer[50];
+	sprintf_s(buffer, "FPS: %4d", getFPS());
+	m_renderer->setRenderColour(226 / 255.f, 223 / 255.f, 0.f, 1.f);
+	m_renderer->drawText(ResourceManager::getFonts()["default"].get(), buffer, 10, 10);
+	m_renderer->setRenderColour(1, 1, 1, 1);
+
 	drawGraph();
 	m_player->render(m_renderer.get());
 
-	for (auto base : m_baseList)
-		base->render(m_renderer.get());
+	for (auto iter = m_enemies.begin(); iter != m_enemies.end(); iter++) {
+		(*iter)->render(m_renderer.get());
+	}
 
+	for (auto base : m_baseList);
+		//base->render(m_renderer.get());
+
+	// Current implementation of drawing the map tileset is causing framerate drop.
+	// Could possibly fix by 'constructing' images using the pixel data upon loading the map, then just make a single draw call per layer
+	// rather than a draw call per sprite on each layer
 #pragma region Tileset
 	static int currentTilesetIndex = 0;
 	pugi::xml_node map = m_mapData.child("map");
@@ -430,7 +341,7 @@ void Game_AI_AaronApp::draw() {
 				// Modify the UV region of the sprite to display the selected tile within the image
 				m_renderer->setUVRect(ux, uy, t.width / (float)t.image->getWidth(), t.height / (float)t.image->getHeight());
 
-				m_renderer->drawSprite(t.image, x * t.width, (float)(m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, (float)t.layerDepth, 0, 1);
+				//m_renderer->drawSprite(t.image, x * t.width, (float)(m_mapHeight * m_tileHeight) - (y * t.height), t.width, t.height, 0, (float)t.layerDepth, 0, 1);
 
 				m_renderer->setUVRect(0, 0, 1, 1);
 			}
@@ -446,8 +357,10 @@ void Game_AI_AaronApp::draw() {
 
 	for (auto iter = m_collisionTiles.begin(); iter != m_collisionTiles.end(); iter++) {
 		m_renderer->setRenderColour(1, 0, 0, 0.3f);
-		jm::Object obj = (*iter);
-		//m_renderer->drawBox(obj.x + obj.width / 2, (m_mapHeight * m_tileHeight) - (obj.y + obj.height / 2), obj.width, obj.height);
+		jm::Rect obj = (*iter);
+
+		if (m_showColliders)
+			m_renderer->drawBox(obj.x + obj.width / 2, (m_mapHeight * m_tileHeight) - (obj.y + obj.height / 2), obj.width, obj.height);
 		m_renderer->setRenderColour(1, 1, 1, 1);
 	}
 #pragma endregion
@@ -456,6 +369,10 @@ void Game_AI_AaronApp::draw() {
 
 	// done drawing sprites
 	m_renderer->end();
+}
+
+const std::vector<jm::Rect>& Game_AI_AaronApp::getColliders() {
+	return m_collisionTiles;
 }
 
 void Game_AI_AaronApp::drawGraph() {
@@ -554,6 +471,125 @@ void Game_AI_AaronApp::updateGraph(float deltaTime) {
 	}
 }
 
-void Game_AI_AaronApp::generateTilesetData() {
+void Game_AI_AaronApp::loadTilesetData() {
+	pugi::xml_parse_result result = m_mapData.load_file("./maps/map1.tmx");
+	if (result) {
+		// Store the map attributes as member variables
+		pugi::xml_node map = m_mapData.child("map");
+		m_mapWidth = map.attribute("width").as_int();
+		m_mapHeight = map.attribute("height").as_int();
+		m_tileWidth = map.attribute("tilewidth").as_int();
+		m_tileHeight = map.attribute("tileheight").as_int();
 
+		// Iterate through each of the tilesets and store their information for later use
+		int tilesetCount = 0;
+		for (auto iter = map.children("tileset").begin(); iter != map.children("tileset").end(); iter++) {
+			pugi::xml_document tilesetData;
+			std::string filepath = "./maps/";
+			tilesetData.load_file((filepath + (*iter).attribute("source").value()).c_str());
+			pugi::xml_node tilesetDataNode = tilesetData.child("tileset");
+			size_t imageWidth = tilesetDataNode.child("image").attribute("width").as_int();
+			size_t imageHeight = tilesetDataNode.child("image").attribute("height").as_int();
+			size_t firstGid = (*iter).attribute("firstgid").as_int();
+			std::string name = tilesetDataNode.attribute("name").as_string();
+			size_t tileWidth = tilesetDataNode.attribute("tilewidth").as_int();
+			size_t tileHeight = tilesetDataNode.attribute("tileheight").as_int();
+			size_t tileCount = tilesetDataNode.attribute("tilecount").as_int();
+			size_t columns = tilesetDataNode.attribute("columns").as_int();
+
+			// Load the image file for each tilset
+			std::string imagePath = tilesetDataNode.child("image").attribute("source").as_string();
+			//std::cout << "Image source " << imagePath << "\n";
+			m_tilesetImageNames.push_back(name);
+			ResourceManager::getTextures()[m_tilesetImageNames[tilesetCount].c_str()] = std::shared_ptr<aie::Texture>(
+				new aie::Texture(imagePath.replace(imagePath.begin(), imagePath.begin() + 1, "").c_str()));
+
+			jm::Tileset ts = jm::Tileset(firstGid, name, tileWidth, tileHeight, tileCount, columns, imageWidth, imageHeight);
+			m_tilesets.push_back(std::move(ts));
+			tilesetCount++;
+		}
+
+		auto objectList = map.child("objectgroup");
+		for (auto iter = objectList.children("object").begin(); iter != objectList.children("object").end(); iter++) {
+			float cx = (*iter).attribute("x").as_float();
+			float cy = (*iter).attribute("y").as_float();
+			float width = (*iter).attribute("width").as_float();
+			float height = (*iter).attribute("height").as_float();
+			jm::Rect collider(cx, cy, width, height);
+			m_collisionTiles.push_back(collider);
+		}
+
+
+		// Iterate through each tile layer to store gid information
+		for (auto iter = map.children("layer").begin(); iter != map.children("layer").end(); iter++) {
+			// GID data is stored in CSV format
+			std::string rawText = (*iter).child("data").text().as_string();
+			std::vector<std::string> gidData;
+			jm::stringSplit(rawText, ',', gidData);
+
+			// Store the tile gid data
+			jm::TileLayer tl((*iter).attribute("name").value(), (*iter).attribute("width").as_int(), (*iter).attribute("height").as_int());
+			tl.layerData = gidData;
+
+			m_tileGid_Layers.push_back(tl);
+		}
+
+		// Iterate through each tile layer to store tile information
+		int currentTilesetIndex = 0;
+		size_t layerIndex = 0;
+		for (auto iter = map.children("layer").begin(); iter != map.children("layer").end(); iter++) {
+			// Iterate through the gid list and store tile information
+			auto currentLayer = m_tileGid_Layers[layerIndex];
+			std::string layerName = (*iter).attribute("name").as_string();
+
+			for (size_t tileIndex = 0; tileIndex < currentLayer.layerData.size(); tileIndex++) {
+				//std::cout << currentLayer.layerData[tileIndex] << ", ";
+				int tempGid = std::stoi(currentLayer.layerData[tileIndex]); // For some reason all the layer data for "top" layer is 0
+
+																			// Adjust the gid for different tilesets and alter the tilesetIndex according to the tile data requested
+				if (currentTilesetIndex >= 0 && tempGid > m_tilesets[currentTilesetIndex].tileCount) {
+					tempGid -= (currentTilesetIndex == 0) ? m_tilesets[currentTilesetIndex].tileCount : m_tilesets[currentTilesetIndex - 1].tileCount;
+					if ((unsigned int)currentTilesetIndex + 1 < m_tilesets.size())
+						currentTilesetIndex++;
+				} else if (currentTilesetIndex > 0 && tempGid != 0 && tempGid < m_tilesets[currentTilesetIndex].firstGID)
+					currentTilesetIndex--;
+
+				jm::Tile t;
+				t.gid = tempGid - 1;
+				if (tempGid != 0)
+					t.image = ResourceManager::getTextures()[m_tilesetImageNames[currentTilesetIndex].c_str()].get();
+				else
+					t.image = nullptr;
+
+				t.width = (float)m_tilesets[currentTilesetIndex].tileWidth;
+				t.height = (float)m_tilesets[currentTilesetIndex].tileHeight;
+				// Calculate uv coordinates needed for accessing the individual tile image
+				t.uv_y = (t.gid == 0) ? 0 : ((t.gid % m_tilesets[currentTilesetIndex].columns) == 0) ? (t.gid / m_tilesets[currentTilesetIndex].columns)
+					: (int)ceil(t.gid / (double)m_tilesets[currentTilesetIndex].columns) - 1;
+				t.uv_x = t.gid - (m_tilesets[currentTilesetIndex].columns * t.uv_y);
+
+				// Set the rendering depth according to the tileset layer
+				std::transform(currentLayer.name.begin(), currentLayer.name.end(), currentLayer.name.begin(), ::tolower);
+				if (currentLayer.name == "background")
+					t.layerDepth = 20;
+				else if (currentLayer.name == "foreground")
+					t.layerDepth = -1;
+				else
+					t.layerDepth = -1;
+
+				m_backgroundTiles[layerName].push_back(t);
+			}
+			layerIndex++;
+		}
+	} else {
+#if 0
+		// TODO: Memory leaks from this part of the code??
+		wchar_t *errorText = new wchar_t[4096];
+		MultiByteToWideChar(CP_ACP, 0, result.description(), -1, errorText, 4096);
+		MessageBox(NULL, errorText, L"Error reading map information", MB_OK | MB_ICONERROR);
+		delete[] errorText;
+#endif
+
+		std::cout << "Problem reading map information:\n" << result.description() << "\n";
+	}
 }

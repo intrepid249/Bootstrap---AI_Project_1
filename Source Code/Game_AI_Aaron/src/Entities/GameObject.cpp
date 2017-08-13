@@ -9,11 +9,13 @@
 #include "Graph\Path.h"
 #include "Pathfinding\Pathfinder.h"
 
+#include <jm_rect.h>
+
 #include <Renderer2D.h>
 #include <glm\glm.hpp>
 #include <Texture.h>
 
-GameObject::GameObject(aie::Texture *tex) : m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)),
+GameObject::GameObject(aie::Texture *tex, Game_AI_AaronApp *app) : m_app(app), m_tex(tex), m_friction(0.0f), m_rotation(0), m_drawn(true), m_scaleAmount(glm::vec2(1, 1)),
 m_size(glm::vec2(tex->getWidth(), tex->getHeight())), m_startNode(nullptr), m_endNode(nullptr) {
 
 	m_behaviourController = std::shared_ptr<BehaviourController>(new BehaviourController());
@@ -146,12 +148,12 @@ const std::shared_ptr<BehaviourController>& GameObject::getBehaviourController()
 #pragma endregion
 
 #pragma region Screen Functions
-void GameObject::checkCollisions(const std::vector<jm::Object>& objList) {
+void GameObject::checkCollisions(const std::vector<jm::Rect>& objList) {
 	float width = (m_tex != nullptr) ? getSize().x : 0;
 	float height = (m_tex != nullptr) ? getSize().x : 0;
 
 	for (auto iter = objList.begin(); iter != objList.end(); iter++) {
-		jm::Object obj = (*iter);
+		jm::Rect obj = (*iter);
 
 		bool hitLeft = (m_pos.x - width / 2 < obj.x + obj.width / 2), hitRight = (m_pos.x + width / 2 > obj.x - obj.width / 2);
 		bool hitBottom = (m_pos.y - height / 2 < obj.y + obj.height / 2), hitTop = (m_pos.y + width / 2 > obj.y - obj.height / 2);

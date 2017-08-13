@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="jm_utils\inc\jm_shapes.h" />
     <ClInclude Include="jm_utils\inc\jm_utilities.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\jm_shapes.cpp" />
     <ClCompile Include="src\jm_utilities.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -84,6 +86,7 @@
     <LibraryPath>$(ProjectDir)jm_utils\libs\;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)jm_utils\libs\</OutDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)dependencies\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
